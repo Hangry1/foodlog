@@ -9,7 +9,7 @@ import {
 import {
     getAuth,
     GoogleAuthProvider,
-    signInWithRedirect,
+    signInWithPopup,
     signOut,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
@@ -163,7 +163,7 @@ googleSignInButton.addEventListener("click", async () => {
 
     try {
 
-        await signInWithRedirect(auth, googleProvider);
+        await signInWithPopup(auth, googleProvider);
 
     } catch (error) {
 
