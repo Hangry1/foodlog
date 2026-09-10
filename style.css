@@ -1,2219 +1,1029 @@
-// ============================================================
-// Firebase imports
-// ============================================================
+/* ==============================
+   GLOBAL
+   ============================== */
 
-import {
-    initializeApp
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+* {
+    box-sizing: border-box;
+}
 
-import {
-    getAuth,
-    GoogleAuthProvider,
-    signInWithPopup,
-    signOut,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+:root {
+    --background: #f7f7f5;
+    --surface: #ffffff;
+    --surface-hover: #fafafa;
 
-import {
-    getFirestore,
-    collection,
-    addDoc,
-    getDocs,
-    doc,
-    updateDoc,
-    deleteDoc,
-    setDoc
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+    --text: #202020;
+    --muted: #777777;
 
+    --border: #e5e5e5;
 
-// ============================================================
-// Firebase configuration
-// ============================================================
+    --accent: #e47b39;
+    --accent-dark: #c96528;
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBv3Krz0n6WHUGD3-EjLzMjl163jwWkkTA",
-    authDomain: "foodlog-e1c83.firebaseapp.com",
-    projectId: "foodlog-e1c83",
-    storageBucket: "foodlog-e1c83.firebasestorage.app",
-    messagingSenderId: "996797044798",
-    appId: "1:996797044798:web:2301d5bae0e4c28e4b996f"
-};
+    --danger: #c94c4c;
 
+    --radius: 14px;
+}
 
-const app = initializeApp(firebaseConfig);
+html,
+body {
+    margin: 0;
+    padding: 0;
 
-const auth = getAuth(app);
-const db = getFirestore(app);
+    min-height: 100%;
 
-const googleProvider = new GoogleAuthProvider();
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
 
+    background: var(--background);
+    color: var(--text);
+}
 
-// ============================================================
-// Application state
-// ============================================================
+body {
+    min-height: 100vh;
+}
 
-let currentUser = null;
-let restaurants = [];
+button,
+input,
+textarea {
+    font: inherit;
+}
 
-let selectedRestaurant = null;
+button {
+    cursor: pointer;
+}
 
-let editingRestaurantId = null;
-let editingDishId = null;
-
-let userLocations = [];
-let userCategories = [];
-
-
-// ============================================================
-// DOM elements
-// ============================================================
-
-const loginScreen =
-    document.getElementById("login-screen");
-
-const appScreen =
-    document.getElementById("app");
-
-const googleSignInButton =
-    document.getElementById("google-sign-in");
-
-const loginError =
-    document.getElementById("login-error");
-
-const userPhoto =
-    document.getElementById("user-photo");
-
-const userName =
-    document.getElementById("user-name");
-
-const homeView =
-    document.getElementById("home-view");
-
-const restaurantView =
-    document.getElementById("restaurant-view");
-
-const restaurantList =
-    document.getElementById("restaurant-list");
-
-const emptyState =
-    document.getElementById("empty-state");
-
-const dishList =
-    document.getElementById("dish-list");
-
-const dishEmptyState =
-    document.getElementById("dish-empty-state");
-
-
-// Restaurant modal
-
-const restaurantModal =
-    document.getElementById("restaurant-modal");
-
-const restaurantForm =
-    document.getElementById("restaurant-form");
-
-const restaurantModalTitle =
-    document.getElementById("restaurant-modal-title");
-
-const restaurantNameInput =
-    document.getElementById("restaurant-name-input");
-
-const restaurantRatingInput =
-    document.getElementById("restaurant-rating-input");
-
-const restaurantFormError =
-    document.getElementById("restaurant-form-error");
-
-const locationOptions =
-    document.getElementById("location-options");
-
-const categoryOptions =
-    document.getElementById("category-options");
-
-const locationSelectionError =
-    document.getElementById("location-selection-error");
-
-const categorySelectionError =
-    document.getElementById("category-selection-error");
-
-
-// Lists modal
-
-const listsModal =
-    document.getElementById("lists-modal");
-
-const locationForm =
-    document.getElementById("location-form");
-
-const newLocationInput =
-    document.getElementById("new-location-input");
-
-const locationFormError =
-    document.getElementById("location-form-error");
-
-const locationList =
-    document.getElementById("location-list");
-
-const categoryForm =
-    document.getElementById("category-form");
-
-const newCategoryInput =
-    document.getElementById("new-category-input");
-
-const categoryFormError =
-    document.getElementById("category-form-error");
-
-const categoryList =
-    document.getElementById("category-list");
-
-
-// Dish modal
-
-const dishModal =
-    document.getElementById("dish-modal");
-
-const dishForm =
-    document.getElementById("dish-form");
-
-const dishModalTitle =
-    document.getElementById("dish-modal-title");
-
-const dishNameInput =
-    document.getElementById("dish-name-input");
-
-const dishRatingInput =
-    document.getElementById("dish-rating-input");
-
-const dishReviewInput =
-    document.getElementById("dish-review-input");
-
-const dishNotesInput =
-    document.getElementById("dish-notes-input");
-
-const dishFormError =
-    document.getElementById("dish-form-error");
-
-
-// ============================================================
-// Authentication
-// ============================================================
-
-googleSignInButton.addEventListener("click", async () => {
-
-    loginError.textContent = "";
-
-    try {
-
-        const result =
-            await signInWithPopup(
-                auth,
-                googleProvider
-            );
-
-        console.log(
-            "Google sign-in successful:",
-            result.user
-        );
-
-    } catch (error) {
-
-        console.error(
-            "GOOGLE SIGN-IN ERROR:",
-            error
-        );
-
-        console.error(
-            "Error code:",
-            error.code
-        );
-
-        console.error(
-            "Error message:",
-            error.message
-        );
-
-        loginError.textContent =
-            `Sign-in error: ${error.code || "unknown"} — ${error.message || "Unknown error"}`;
-
-    }
-
-});
-
-
-document.getElementById("sign-out-button")
-    .addEventListener("click", async () => {
-
-        try {
-
-            await signOut(auth);
-
-        } catch (error) {
-
-            console.error(
-                "Sign out error:",
-                error
-            );
-
-        }
-
-    });
-
-
-onAuthStateChanged(auth, async (user) => {
-
-    if (user) {
-
-        currentUser = user;
-
-        showApp();
-
-        await loadUserLists();
-
-        await loadRestaurants();
-
-    } else {
-
-        currentUser = null;
-
-        userLocations = [];
-        userCategories = [];
-
-        showLogin();
-
-    }
-
-});
-
-
-// ============================================================
-// Login / App visibility
-// ============================================================
-
-function showLogin() {
-
-    loginScreen.classList.remove("hidden");
-    appScreen.classList.add("hidden");
-
+.hidden {
+    display: none !important;
 }
 
 
-function showApp() {
+/* ==============================
+   LOGIN
+   ============================== */
 
-    loginScreen.classList.add("hidden");
-    appScreen.classList.remove("hidden");
+.screen {
+    min-height: 100vh;
 
-    userName.textContent =
-        currentUser.displayName || "User";
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    if (currentUser.photoURL) {
+    padding: 24px;
+}
 
-        userPhoto.src =
-            currentUser.photoURL;
+.login-card {
+    width: 100%;
+    max-width: 420px;
 
-        userPhoto.alt =
-            currentUser.displayName || "User";
+    padding: 48px 40px;
 
-    }
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
 
-    showHome();
+    text-align: center;
 
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+}
+
+.brand {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -2px;
+}
+
+.brand span {
+    color: var(--accent);
+}
+
+.tagline {
+    margin: 8px 0 32px;
+
+    color: var(--muted);
+    font-size: 16px;
 }
 
 
-// ============================================================
-// User Lists
-// ============================================================
+/* Google button */
 
-async function loadUserLists() {
+.google-button {
+    width: 100%;
 
-    if (!currentUser) return;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 
-    try {
+    padding: 13px 18px;
 
-        const settingsRef =
-            doc(
-                db,
-                "users",
-                currentUser.uid,
-                "settings",
-                "lists"
-            );
+    background: white;
 
-        const settingsSnapshot =
-            await getDocs(
-                collection(
-                    db,
-                    "users",
-                    currentUser.uid,
-                    "settings"
-                )
-            );
+    border: 1px solid #d5d5d5;
+    border-radius: 9px;
 
-        let settingsData = null;
+    font-weight: 600;
 
-        settingsSnapshot.forEach((document) => {
+    transition:
+        background 0.15s,
+        box-shadow 0.15s;
+}
 
-            if (document.id === "lists") {
+.google-button:hover {
+    background: #fafafa;
 
-                settingsData =
-                    document.data();
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
 
-            }
-
-        });
-
-
-        if (settingsData) {
-
-            userLocations =
-                Array.isArray(settingsData.locations)
-                    ? settingsData.locations
-                    : [];
-
-            userCategories =
-                Array.isArray(settingsData.categories)
-                    ? settingsData.categories
-                    : [];
-
-        } else {
-
-            userLocations = [];
-            userCategories = [];
-
-        }
-
-        userLocations =
-            cleanStringArray(userLocations);
-
-        userCategories =
-            cleanStringArray(userCategories);
-
-        renderManagedLists();
-
-    } catch (error) {
-
-        console.error(
-            "Error loading user lists:",
-            error
-        );
-
-        userLocations = [];
-        userCategories = [];
-
-    }
-
+.google-icon {
+    font-weight: 800;
+    color: #4285f4;
 }
 
 
-async function saveUserLists() {
+/* ==============================
+   HEADER
+   ============================== */
 
-    if (!currentUser) return;
+.site-header {
+    min-height: 70px;
 
-    const settingsRef =
-        doc(
-            db,
-            "users",
-            currentUser.uid,
-            "settings",
-            "lists"
-        );
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-    await setDoc(
-        settingsRef,
-        {
-            locations: userLocations,
-            categories: userCategories
-        }
-    );
+    padding: 12px 32px;
 
+    background: var(--surface);
+
+    border-bottom: 1px solid var(--border);
+
+    gap: 20px;
+}
+
+.brand-button {
+    border: none;
+    background: transparent;
+
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -1px;
+
+    padding: 0;
+}
+
+.brand-button span {
+    color: var(--accent);
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-photo {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 50%;
+
+    object-fit: cover;
+
+    background: #ddd;
+}
+
+#user-name {
+    font-weight: 600;
+}
+
+.text-button {
+    border: none;
+    background: transparent;
+
+    color: var(--muted);
+
+    padding: 6px 8px;
+}
+
+.text-button:hover {
+    color: var(--text);
 }
 
 
-// ============================================================
-// List Management
-// ============================================================
+/* ==============================
+   MAIN CONTENT
+   ============================== */
 
-document.getElementById("manage-lists-button")
-    .addEventListener("click", () => {
+.view {
+    max-width: 1100px;
 
-        renderManagedLists();
+    margin: 0 auto;
 
-        listsModal.classList.remove("hidden");
+    padding: 42px 28px 80px;
+}
 
-    });
+.page-heading,
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
+    gap: 20px;
 
-document.getElementById("manage-locations-from-restaurant")
-    .addEventListener("click", () => {
+    margin-bottom: 28px;
+}
 
-        restaurantModal.classList.add("hidden");
+h1,
+h2,
+h3,
+p {
+    margin-top: 0;
+}
 
-        renderManagedLists();
+h1 {
+    margin-bottom: 6px;
 
-        listsModal.classList.remove("hidden");
+    font-size: 32px;
+    letter-spacing: -1px;
+}
 
-    });
+h2 {
+    margin-bottom: 4px;
 
+    font-size: 23px;
+}
 
-document.getElementById("manage-categories-from-restaurant")
-    .addEventListener("click", () => {
+.subtitle {
+    margin: 0;
 
-        restaurantModal.classList.add("hidden");
-
-        renderManagedLists();
-
-        listsModal.classList.remove("hidden");
-
-    });
-
-
-locationForm.addEventListener("submit", async (event) => {
-
-    event.preventDefault();
-
-    locationFormError.textContent = "";
-
-    const value =
-        newLocationInput.value.trim();
-
-    if (!value) {
-
-        locationFormError.textContent =
-            "Please enter a location.";
-
-        return;
-
-    }
-
-    const exists =
-        userLocations.some(
-            location =>
-                location.toLowerCase() === value.toLowerCase()
-        );
-
-    if (exists) {
-
-        locationFormError.textContent =
-            "That location already exists.";
-
-        return;
-
-    }
-
-    try {
-
-        userLocations.push(value);
-
-        userLocations.sort(
-            (a, b) => a.localeCompare(b)
-        );
-
-        await saveUserLists();
-
-        newLocationInput.value = "";
-
-        renderManagedLists();
-
-        renderLocationOptions();
-
-    } catch (error) {
-
-        console.error(error);
-
-        locationFormError.textContent =
-            "Unable to save the location.";
-
-    }
-
-});
-
-
-categoryForm.addEventListener("submit", async (event) => {
-
-    event.preventDefault();
-
-    categoryFormError.textContent = "";
-
-    const value =
-        newCategoryInput.value.trim();
-
-    if (!value) {
-
-        categoryFormError.textContent =
-            "Please enter a category.";
-
-        return;
-
-    }
-
-    const exists =
-        userCategories.some(
-            category =>
-                category.toLowerCase() === value.toLowerCase()
-        );
-
-    if (exists) {
-
-        categoryFormError.textContent =
-            "That category already exists.";
-
-        return;
-
-    }
-
-    try {
-
-        userCategories.push(value);
-
-        userCategories.sort(
-            (a, b) => a.localeCompare(b)
-        );
-
-        await saveUserLists();
-
-        newCategoryInput.value = "";
-
-        renderManagedLists();
-
-        renderCategoryOptions();
-
-    } catch (error) {
-
-        console.error(error);
-
-        categoryFormError.textContent =
-            "Unable to save the category.";
-
-    }
-
-});
-
-
-async function deleteLocation(location) {
-
-    const usedBy =
-        restaurants.filter(
-            restaurant =>
-                getRestaurantLocations(restaurant)
-                    .includes(location)
-        );
-
-    let message =
-        `Delete "${location}" from your location list?`;
-
-    if (usedBy.length > 0) {
-
-        message +=
-            `\n\n${usedBy.length} restaurant` +
-            `${usedBy.length === 1 ? "" : "s"} currently ` +
-            `use${usedBy.length === 1 ? "s" : ""} this location.`;
-
-        message +=
-            "\n\nThe location will be removed from those restaurants as well.";
-
-    }
-
-    if (!confirm(message)) return;
-
-    try {
-
-        userLocations =
-            userLocations.filter(
-                item => item !== location
-            );
-
-        for (const restaurant of usedBy) {
-
-            const locations =
-                getRestaurantLocations(restaurant)
-                    .filter(item => item !== location);
-
-            await updateDoc(
-                doc(
-                    db,
-                    "users",
-                    currentUser.uid,
-                    "restaurants",
-                    restaurant.id
-                ),
-                {
-                    locations,
-                    location:
-                        locations.join(", ")
-                }
-            );
-
-        }
-
-        await saveUserLists();
-
-        await loadRestaurants();
-
-        renderManagedLists();
-
-        renderLocationOptions();
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to delete the location."
-        );
-
-    }
-
+    color: var(--muted);
 }
 
 
-async function deleteCategory(category) {
+/* ==============================
+   BUTTONS
+   ============================== */
 
-    const usedBy =
-        restaurants.filter(
-            restaurant =>
-                getRestaurantCategories(restaurant)
-                    .includes(category)
-        );
+.primary-button,
+.secondary-button,
+.danger-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 
-    let message =
-        `Delete "${category}" from your category list?`;
+    padding: 10px 16px;
 
-    if (usedBy.length > 0) {
+    border-radius: 9px;
 
-        message +=
-            `\n\n${usedBy.length} restaurant` +
-            `${usedBy.length === 1 ? "" : "s"} currently ` +
-            `use${usedBy.length === 1 ? "" : ""} this category.`;
+    font-weight: 600;
 
-        message +=
-            "\n\nThe category will be removed from those restaurants as well.";
+    transition:
+        background 0.15s,
+        border-color 0.15s,
+        transform 0.1s;
+}
 
-    }
+.primary-button {
+    color: white;
 
-    if (!confirm(message)) return;
+    background: var(--accent);
 
-    try {
+    border: 1px solid var(--accent);
+}
 
-        userCategories =
-            userCategories.filter(
-                item => item !== category
-            );
+.primary-button:hover {
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+}
 
-        for (const restaurant of usedBy) {
+.primary-button:active,
+.secondary-button:active,
+.danger-button:active {
+    transform: translateY(1px);
+}
 
-            const categories =
-                getRestaurantCategories(restaurant)
-                    .filter(item => item !== category);
+.secondary-button {
+    background: white;
 
-            await updateDoc(
-                doc(
-                    db,
-                    "users",
-                    currentUser.uid,
-                    "restaurants",
-                    restaurant.id
-                ),
-                {
-                    categories,
-                    cuisine:
-                        categories.join(", ")
-                }
-            );
+    color: var(--text);
 
-        }
+    border: 1px solid var(--border);
+}
 
-        await saveUserLists();
+.secondary-button:hover {
+    background: var(--surface-hover);
+}
 
-        await loadRestaurants();
+.danger-button {
+    background: white;
 
-        renderManagedLists();
+    color: var(--danger);
 
-        renderCategoryOptions();
+    border: 1px solid #e7caca;
+}
 
-    } catch (error) {
+.danger-button:hover {
+    background: #fff5f5;
+}
 
-        console.error(error);
-
-        alert(
-            "Unable to delete the category."
-        );
-
-    }
-
+.full-width {
+    width: 100%;
 }
 
 
-function renderManagedLists() {
+/* ==============================
+   RESTAURANT CARDS
+   ============================== */
 
-    locationList.innerHTML = "";
+.restaurant-grid {
+    display: grid;
 
-    categoryList.innerHTML = "";
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
 
+    gap: 20px;
+}
 
-    if (userLocations.length === 0) {
+.restaurant-card {
+    padding: 22px;
 
-        locationList.innerHTML =
-            `<div class="managed-list-empty">
-                No locations added yet.
-            </div>`;
+    background: var(--surface);
 
-    } else {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
 
-        userLocations.forEach((location) => {
+    cursor: pointer;
 
-            const item =
-                document.createElement("div");
+    transition:
+        transform 0.15s,
+        box-shadow 0.15s,
+        border-color 0.15s;
+}
 
-            item.className =
-                "managed-list-item";
+.restaurant-card:hover {
+    transform: translateY(-2px);
 
-            item.innerHTML = `
+    border-color: #d6d6d6;
 
-                <span>
-                    ${escapeHtml(location)}
-                </span>
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+}
 
-                <button
-                    type="button"
-                    class="delete-list-button">
-                    Delete
-                </button>
+.restaurant-card h3 {
+    margin: 0 0 8px;
 
-            `;
+    font-size: 20px;
+}
 
-            item.querySelector(
-                ".delete-list-button"
-            ).addEventListener(
-                "click",
-                () => deleteLocation(location)
-            );
+.card-location,
+.card-cuisine {
+    margin: 3px 0;
 
-            locationList.appendChild(item);
+    color: var(--muted);
 
-        });
+    font-size: 14px;
 
-    }
+    line-height: 1.45;
+}
 
+.card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
 
-    if (userCategories.length === 0) {
+    margin-top: 22px;
+}
 
-        categoryList.innerHTML =
-            `<div class="managed-list-empty">
-                No categories added yet.
-            </div>`;
+.card-rating {
+    font-size: 18px;
+    font-weight: 700;
+}
 
-    } else {
+.card-dishes {
+    color: var(--muted);
 
-        userCategories.forEach((category) => {
-
-            const item =
-                document.createElement("div");
-
-            item.className =
-                "managed-list-item";
-
-            item.innerHTML = `
-
-                <span>
-                    ${escapeHtml(category)}
-                </span>
-
-                <button
-                    type="button"
-                    class="delete-list-button">
-                    Delete
-                </button>
-
-            `;
-
-            item.querySelector(
-                ".delete-list-button"
-            ).addEventListener(
-                "click",
-                () => deleteCategory(category)
-            );
-
-            categoryList.appendChild(item);
-
-        });
-
-    }
-
+    font-size: 13px;
 }
 
 
-// ============================================================
-// Restaurant loading
-// ============================================================
+/* ==============================
+   EMPTY STATE
+   ============================== */
 
-async function loadRestaurants() {
+.empty-state {
+    padding: 70px 20px;
 
-    if (!currentUser) return;
+    text-align: center;
 
-    try {
+    background: var(--surface);
 
-        const restaurantCollection =
-            collection(
-                db,
-                "users",
-                currentUser.uid,
-                "restaurants"
-            );
+    border: 1px dashed #d7d7d7;
+    border-radius: var(--radius);
+}
 
-        const snapshot =
-            await getDocs(
-                restaurantCollection
-            );
+.empty-state.small {
+    padding: 45px 20px;
+}
 
-        restaurants =
-            snapshot.docs.map((document) => ({
+.empty-icon {
+    margin-bottom: 12px;
 
-                id: document.id,
-                ...document.data()
+    font-size: 42px;
+}
 
-            }));
+.empty-state h2 {
+    margin-bottom: 8px;
+}
 
-        restaurants.sort((a, b) =>
-            (a.name || "")
-                .localeCompare(b.name || "")
-        );
+.empty-state p {
+    max-width: 450px;
 
-        renderRestaurants();
+    margin: 0 auto 22px;
 
-    } catch (error) {
-
-        console.error(
-            "Error loading restaurants:",
-            error
-        );
-
-        restaurantList.innerHTML = `
-            <p class="error-message">
-                Unable to load your restaurants.
-                Please refresh the page.
-            </p>
-        `;
-
-    }
-
+    color: var(--muted);
 }
 
 
-// ============================================================
-// Restaurant helper functions
-// ============================================================
+/* ==============================
+   RESTAURANT DETAIL
+   ============================== */
 
-function getRestaurantLocations(restaurant) {
+.back-button {
+    margin-bottom: 28px;
 
-    if (Array.isArray(restaurant.locations)) {
+    padding: 0;
 
-        return cleanStringArray(
-            restaurant.locations
-        );
+    background: transparent;
 
-    }
+    border: none;
 
-    if (restaurant.location) {
+    color: var(--muted);
 
-        return cleanStringArray(
-            String(restaurant.location)
-                .split(",")
-        );
+    font-weight: 600;
+}
 
-    }
+.back-button:hover {
+    color: var(--text);
+}
 
-    return [];
+.restaurant-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
 
+    gap: 30px;
+
+    margin-bottom: 55px;
+}
+
+.restaurant-header-info h1 {
+    margin-bottom: 12px;
+
+    font-size: 38px;
+}
+
+.restaurant-meta {
+    margin: 4px 0;
+
+    color: var(--muted);
+
+    line-height: 1.5;
+}
+
+.large-rating {
+    margin-top: 18px;
+
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.restaurant-actions {
+    display: flex;
+    gap: 8px;
 }
 
 
-function getRestaurantCategories(restaurant) {
+/* ==============================
+   DISHES
+   ============================== */
 
-    if (Array.isArray(restaurant.categories)) {
+.dish-list {
+    display: grid;
 
-        return cleanStringArray(
-            restaurant.categories
-        );
+    gap: 16px;
+}
 
-    }
+.dish-card {
+    padding: 22px;
 
-    if (restaurant.cuisine) {
+    background: var(--surface);
 
-        return cleanStringArray(
-            String(restaurant.cuisine)
-                .split(",")
-        );
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
 
-    }
+.dish-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
 
-    return [];
+    gap: 20px;
+}
 
+.dish-card h3 {
+    margin: 0 0 6px;
+
+    font-size: 19px;
+}
+
+.dish-rating {
+    white-space: nowrap;
+
+    font-weight: 700;
+}
+
+.dish-review {
+    margin: 14px 0 8px;
+
+    line-height: 1.55;
+}
+
+.dish-notes {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+.dish-actions {
+    display: flex;
+
+    gap: 8px;
+
+    margin-top: 18px;
+}
+
+.small-button {
+    padding: 6px 10px;
+
+    font-size: 13px;
+
+    border-radius: 7px;
 }
 
 
-function cleanStringArray(values) {
+/* ==============================
+   MODALS
+   ============================== */
 
-    return [...new Set(
-        values
-            .map(value => String(value).trim())
-            .filter(Boolean)
-    )];
+.modal {
+    position: fixed;
 
+    inset: 0;
+
+    z-index: 100;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.modal-card {
+    position: relative;
+
+    width: 100%;
+    max-width: 500px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    padding: 30px;
+
+    background: var(--surface);
+
+    border-radius: 16px;
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.lists-modal-card {
+    max-width: 600px;
+}
+
+.modal-card h2 {
+    margin-bottom: 24px;
+}
+
+.modal-description {
+    margin-top: -12px;
+    margin-bottom: 25px;
+
+    color: var(--muted);
+
+    line-height: 1.5;
+}
+
+.modal-close {
+    position: absolute;
+
+    top: 14px;
+    right: 16px;
+
+    width: 32px;
+    height: 32px;
+
+    border: none;
+
+    background: transparent;
+
+    font-size: 25px;
+
+    color: var(--muted);
+}
+
+.modal-close:hover {
+    color: var(--text);
 }
 
 
-// ============================================================
-// Restaurant rendering
-// ============================================================
+/* ==============================
+   FORMS
+   ============================== */
 
-function renderRestaurants() {
+form {
+    display: grid;
 
-    restaurantList.innerHTML = "";
+    gap: 9px;
+}
 
-    if (restaurants.length === 0) {
+form label {
+    margin-top: 8px;
 
-        emptyState.classList.remove("hidden");
+    font-size: 14px;
 
-        return;
+    font-weight: 600;
+}
 
-    }
+form input,
+form textarea {
+    width: 100%;
 
-    emptyState.classList.add("hidden");
+    padding: 11px 12px;
 
+    background: white;
 
-    restaurants.forEach((restaurant) => {
+    border: 1px solid #d8d8d8;
+    border-radius: 8px;
 
-        const locations =
-            getRestaurantLocations(restaurant);
+    color: var(--text);
 
-        const categories =
-            getRestaurantCategories(restaurant);
+    outline: none;
 
+    resize: vertical;
+}
 
-        const card =
-            document.createElement("div");
+form input:focus,
+form textarea:focus {
+    border-color: var(--accent);
 
-        card.className =
-            "restaurant-card";
+    box-shadow: 0 0 0 3px rgba(228, 123, 57, 0.12);
+}
 
-        card.innerHTML = `
+.rating-input {
+    display: flex;
+    align-items: center;
 
-            <h3>
-                ${escapeHtml(restaurant.name)}
-            </h3>
+    gap: 8px;
+}
 
-            <p class="card-location">
-                ${escapeHtml(
-                    locations.join(" • ") ||
-                    "No location"
-                )}
-            </p>
+.rating-input input {
+    width: 110px;
+}
 
-            <p class="card-cuisine">
-                ${escapeHtml(
-                    categories.join(" • ") ||
-                    "No categories"
-                )}
-            </p>
-
-            <div class="card-bottom">
-
-                <div class="card-rating">
-                    ★ ${Number(
-                        restaurant.overallRating
-                    ).toFixed(1)} / 10
-                </div>
-
-                <div class="card-dishes">
-                    Loading dishes...
-                </div>
-
-            </div>
-
-        `;
-
-
-        card.addEventListener("click", () => {
-
-            openRestaurant(
-                restaurant.id
-            );
-
-        });
-
-
-        restaurantList.appendChild(card);
-
-
-        loadDishCount(
-            restaurant.id,
-            card.querySelector(".card-dishes")
-        );
-
-    });
-
+.rating-input span {
+    color: var(--muted);
 }
 
 
-// ============================================================
-// Dish count
-// ============================================================
+/* ==============================
+   MULTI-SELECT
+   ============================== */
 
-async function loadDishCount(
-    restaurantId,
-    element
-) {
+.multi-select-options {
+    display: flex;
 
-    try {
+    flex-wrap: wrap;
 
-        const dishCollection =
-            collection(
-                db,
-                "users",
-                currentUser.uid,
-                "restaurants",
-                restaurantId,
-                "dishes"
-            );
+    gap: 8px;
 
-        const snapshot =
-            await getDocs(dishCollection);
+    padding: 4px 0;
+}
 
-        const count =
-            snapshot.size;
+.multi-select-option {
+    position: relative;
+}
 
-        element.textContent =
-            `${count} ${
-                count === 1
-                    ? "dish"
-                    : "dishes"
-            } logged`;
+.multi-select-option input {
+    position: absolute;
 
-    } catch (error) {
+    opacity: 0;
 
-        console.error(error);
+    width: 1px;
+    height: 1px;
+}
 
-        element.textContent = "";
+.multi-select-option label {
+    display: inline-flex;
+    align-items: center;
 
-    }
+    margin: 0;
 
+    padding: 8px 12px;
+
+    background: #fff;
+
+    border: 1px solid var(--border);
+    border-radius: 20px;
+
+    color: var(--muted);
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s,
+        color 0.15s,
+        border-color 0.15s;
+}
+
+.multi-select-option label:hover {
+    border-color: #cfcfcf;
+
+    color: var(--text);
+}
+
+.multi-select-option input:checked + label {
+    background: var(--accent);
+
+    border-color: var(--accent);
+
+    color: white;
+}
+
+.multi-select-option input:focus + label {
+    box-shadow:
+        0 0 0 3px rgba(228, 123, 57, 0.12);
+}
+
+.manage-inline-button {
+    width: fit-content;
+
+    margin-top: 0;
+
+    padding: 2px 0;
+
+    background: transparent;
+
+    border: none;
+
+    color: var(--accent);
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+.manage-inline-button:hover {
+    color: var(--accent-dark);
 }
 
 
-// ============================================================
-// Restaurant detail
-// ============================================================
+/* ==============================
+   MANAGE LISTS
+   ============================== */
 
-async function openRestaurant(restaurantId) {
+.list-manager-section {
+    padding-top: 20px;
 
-    selectedRestaurant =
-        restaurants.find(
-            restaurant =>
-                restaurant.id === restaurantId
-        );
+    margin-top: 20px;
 
-    if (!selectedRestaurant) return;
+    border-top: 1px solid var(--border);
+}
 
-    homeView.classList.add("hidden");
+.list-manager-section:first-of-type {
+    padding-top: 0;
 
-    restaurantView.classList.remove("hidden");
+    margin-top: 0;
 
+    border-top: none;
+}
 
-    const locations =
-        getRestaurantLocations(
-            selectedRestaurant
-        );
+.list-manager-section h3 {
+    margin-bottom: 12px;
 
-    const categories =
-        getRestaurantCategories(
-            selectedRestaurant
-        );
+    font-size: 17px;
+}
 
+.list-add-form {
+    display: flex;
 
-    document.getElementById("restaurant-name")
-        .textContent =
-        selectedRestaurant.name;
+    grid-template-columns: none;
 
+    gap: 8px;
+}
 
-    document.getElementById("restaurant-location")
-        .textContent =
-        locations.join(" • ");
+.list-add-form input {
+    flex: 1;
 
+    min-width: 0;
+}
 
-    document.getElementById("restaurant-cuisine")
-        .textContent =
-        categories.join(" • ");
+.list-add-form button {
+    flex-shrink: 0;
+}
 
+.managed-list {
+    display: grid;
 
-    document.getElementById("restaurant-rating")
-        .textContent =
-        `★ ${
-            Number(
-                selectedRestaurant.overallRating
-            ).toFixed(1)
-        } / 10`;
+    gap: 8px;
 
+    margin-top: 12px;
+}
 
-    await loadDishes();
+.managed-list-empty {
+    padding: 12px;
 
+    color: var(--muted);
+
+    background: var(--background);
+
+    border-radius: 8px;
+
+    font-size: 14px;
+}
+
+.managed-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 10px 12px;
+
+    background: var(--background);
+
+    border-radius: 8px;
+}
+
+.managed-list-item span {
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.delete-list-button {
+    flex-shrink: 0;
+
+    padding: 4px 8px;
+
+    background: transparent;
+
+    border: none;
+
+    color: var(--danger);
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+.delete-list-button:hover {
+    text-decoration: underline;
 }
 
 
-// ============================================================
-// Load dishes
-// ============================================================
+/* ==============================
+   ERRORS
+   ============================== */
 
-async function loadDishes() {
+.error-message {
+    min-height: 18px;
 
-    if (!selectedRestaurant) return;
+    margin: 12px 0 0;
 
-    dishList.innerHTML = "";
+    color: var(--danger);
 
-    try {
+    font-size: 14px;
+}
 
-        const dishCollection =
-            collection(
-                db,
-                "users",
-                currentUser.uid,
-                "restaurants",
-                selectedRestaurant.id,
-                "dishes"
-            );
+.field-error {
+    min-height: 17px;
 
-        const snapshot =
-            await getDocs(dishCollection);
+    margin: 0;
 
+    color: var(--danger);
 
-        const dishes =
-            snapshot.docs.map((document) => ({
-
-                id: document.id,
-                ...document.data()
-
-            }));
-
-
-        dishes.sort((a, b) =>
-            (a.name || "")
-                .localeCompare(b.name || "")
-        );
-
-
-        if (dishes.length === 0) {
-
-            dishEmptyState
-                .classList
-                .remove("hidden");
-
-            return;
-
-        }
-
-        dishEmptyState
-            .classList
-            .add("hidden");
-
-
-        dishes.forEach((dish) => {
-
-            renderDish(dish);
-
-        });
-
-    } catch (error) {
-
-        console.error(
-            "Error loading dishes:",
-            error
-        );
-
-        dishList.innerHTML = `
-            <p class="error-message">
-                Unable to load dishes.
-            </p>
-        `;
-
-    }
-
+    font-size: 13px;
 }
 
 
-// ============================================================
-// Render a dish
-// ============================================================
+/* ==============================
+   MOBILE
+   ============================== */
 
-function renderDish(dish) {
+@media (max-width: 800px) {
 
-    const card =
-        document.createElement("div");
+    .site-header {
+        padding: 12px 18px;
 
-    card.className =
-        "dish-card";
-
-    card.innerHTML = `
-
-        <div class="dish-card-header">
-
-            <div>
-                <h3>
-                    ${escapeHtml(dish.name)}
-                </h3>
-            </div>
-
-            <div class="dish-rating">
-                ★ ${
-                    Number(dish.rating).toFixed(1)
-                } / 10
-            </div>
-
-        </div>
-
-        ${
-            dish.review
-                ? `<p class="dish-review">
-                    ${escapeHtml(dish.review)}
-                   </p>`
-                : ""
-        }
-
-        ${
-            dish.notes
-                ? `<p class="dish-notes">
-                    ${escapeHtml(dish.notes)}
-                   </p>`
-                : ""
-        }
-
-        <div class="dish-actions">
-
-            <button
-                class="secondary-button small-button edit-dish-button">
-                Edit
-            </button>
-
-            <button
-                class="danger-button small-button delete-dish-button">
-                Delete
-            </button>
-
-        </div>
-
-    `;
-
-
-    card.querySelector(
-        ".edit-dish-button"
-    ).addEventListener("click", (event) => {
-
-        event.stopPropagation();
-
-        openDishModal(dish);
-
-    });
-
-
-    card.querySelector(
-        ".delete-dish-button"
-    ).addEventListener("click", (event) => {
-
-        event.stopPropagation();
-
-        deleteDish(dish.id);
-
-    });
-
-
-    dishList.appendChild(card);
-
-}
-
-
-// ============================================================
-// Add / Edit Restaurant
-// ============================================================
-
-function openRestaurantModal(
-    restaurant = null
-) {
-
-    editingRestaurantId =
-        restaurant
-            ? restaurant.id
-            : null;
-
-
-    restaurantModalTitle.textContent =
-        restaurant
-            ? "Edit Restaurant"
-            : "Add Restaurant";
-
-
-    restaurantNameInput.value =
-        restaurant?.name || "";
-
-
-    restaurantRatingInput.value =
-        restaurant?.overallRating ?? "";
-
-
-    restaurantFormError.textContent = "";
-
-    locationSelectionError.textContent = "";
-
-    categorySelectionError.textContent = "";
-
-
-    const selectedLocations =
-        restaurant
-            ? getRestaurantLocations(
-                restaurant
-            )
-            : [];
-
-
-    const selectedCategories =
-        restaurant
-            ? getRestaurantCategories(
-                restaurant
-            )
-            : [];
-
-
-    renderLocationOptions(
-        selectedLocations
-    );
-
-    renderCategoryOptions(
-        selectedCategories
-    );
-
-
-    restaurantModal.classList.remove(
-        "hidden"
-    );
-
-    restaurantNameInput.focus();
-
-}
-
-
-function renderLocationOptions(
-    selectedValues = []
-) {
-
-    locationOptions.innerHTML = "";
-
-    const selected =
-        new Set(selectedValues);
-
-
-    if (userLocations.length === 0) {
-
-        locationOptions.innerHTML = `
-            <p class="field-error">
-                No locations yet. Add one using
-                "Manage locations".
-            </p>
-        `;
-
-        return;
-
+        flex-wrap: wrap;
     }
 
-
-    userLocations.forEach((location, index) => {
-
-        const id =
-            `location-option-${index}`;
-
-        const wrapper =
-            document.createElement("div");
-
-        wrapper.className =
-            "multi-select-option";
-
-        wrapper.innerHTML = `
-
-            <input
-                type="checkbox"
-                id="${id}"
-                value="${escapeHtml(location)}"
-                ${selected.has(location)
-                    ? "checked"
-                    : ""}
-            >
-
-            <label for="${id}">
-                ${escapeHtml(location)}
-            </label>
-
-        `;
-
-        locationOptions.appendChild(
-            wrapper
-        );
-
-    });
-
-}
-
-
-function renderCategoryOptions(
-    selectedValues = []
-) {
-
-    categoryOptions.innerHTML = "";
-
-    const selected =
-        new Set(selectedValues);
-
-
-    if (userCategories.length === 0) {
-
-        categoryOptions.innerHTML = `
-            <p class="field-error">
-                No categories yet. Add one using
-                "Manage categories".
-            </p>
-        `;
-
-        return;
-
+    .user-menu {
+        gap: 6px;
     }
 
-
-    userCategories.forEach((category, index) => {
-
-        const id =
-            `category-option-${index}`;
-
-        const wrapper =
-            document.createElement("div");
-
-        wrapper.className =
-            "multi-select-option";
-
-        wrapper.innerHTML = `
-
-            <input
-                type="checkbox"
-                id="${id}"
-                value="${escapeHtml(category)}"
-                ${selected.has(category)
-                    ? "checked"
-                    : ""}
-            >
-
-            <label for="${id}">
-                ${escapeHtml(category)}
-            </label>
-
-        `;
-
-        categoryOptions.appendChild(
-            wrapper
-        );
-
-    });
-
-}
-
-
-function getCheckedValues(container) {
-
-    return [
-        ...container.querySelectorAll(
-            'input[type="checkbox"]:checked'
-        )
-    ].map(
-        input => input.value
-    );
-
-}
-
-
-restaurantForm.addEventListener(
-    "submit",
-    async (event) => {
-
-        event.preventDefault();
-
-        restaurantFormError.textContent = "";
-
-        locationSelectionError.textContent = "";
-
-        categorySelectionError.textContent = "";
-
-
-        const name =
-            restaurantNameInput.value.trim();
-
-
-        const locations =
-            getCheckedValues(
-                locationOptions
-            );
-
-
-        const categories =
-            getCheckedValues(
-                categoryOptions
-            );
-
-
-        const rating =
-            Number(
-                restaurantRatingInput.value
-            );
-
-
-        if (!name) {
-
-            restaurantFormError.textContent =
-                "Please enter a restaurant name.";
-
-            return;
-
-        }
-
-
-        if (locations.length === 0) {
-
-            locationSelectionError.textContent =
-                "Please select at least one location.";
-
-            return;
-
-        }
-
-
-        if (categories.length === 0) {
-
-            categorySelectionError.textContent =
-                "Please select at least one category.";
-
-            return;
-
-        }
-
-
-        if (
-            Number.isNaN(rating) ||
-            rating < 0 ||
-            rating > 10
-        ) {
-
-            restaurantFormError.textContent =
-                "Please enter a rating from 0 to 10.";
-
-            return;
-
-        }
-
-
-        try {
-
-            const restaurantData = {
-
-                name,
-
-                locations,
-
-                categories,
-
-                overallRating: rating,
-
-                // Keep these fields for compatibility
-                // with the original data structure.
-                location:
-                    locations.join(", "),
-
-                cuisine:
-                    categories.join(", ")
-
-            };
-
-
-            if (editingRestaurantId) {
-
-                const restaurantRef =
-                    doc(
-                        db,
-                        "users",
-                        currentUser.uid,
-                        "restaurants",
-                        editingRestaurantId
-                    );
-
-                await updateDoc(
-                    restaurantRef,
-                    restaurantData
-                );
-
-            } else {
-
-                await addDoc(
-                    collection(
-                        db,
-                        "users",
-                        currentUser.uid,
-                        "restaurants"
-                    ),
-                    restaurantData
-                );
-
-            }
-
-
-            closeModal(
-                restaurantModal
-            );
-
-
-            await loadRestaurants();
-
-
-            if (
-                editingRestaurantId &&
-                selectedRestaurant
-            ) {
-
-                selectedRestaurant =
-                    restaurants.find(
-                        restaurant =>
-                            restaurant.id ===
-                            editingRestaurantId
-                    );
-
-
-                await openRestaurant(
-                    editingRestaurantId
-                );
-
-            }
-
-        } catch (error) {
-
-            console.error(error);
-
-            restaurantFormError.textContent =
-                "Unable to save restaurant. Please try again.";
-
-        }
-
-    }
-);
-
-
-// ============================================================
-// Delete Restaurant
-// ============================================================
-
-async function deleteRestaurant() {
-
-    if (!selectedRestaurant) return;
-
-
-    const confirmed =
-        confirm(
-            `Delete "${selectedRestaurant.name}"?\n\n` +
-            "This will permanently delete the restaurant " +
-            "and all of its dishes."
-        );
-
-
-    if (!confirmed) return;
-
-
-    try {
-
-        const dishCollection =
-            collection(
-                db,
-                "users",
-                currentUser.uid,
-                "restaurants",
-                selectedRestaurant.id,
-                "dishes"
-            );
-
-
-        const dishSnapshot =
-            await getDocs(
-                dishCollection
-            );
-
-
-        for (
-            const dish
-            of dishSnapshot.docs
-        ) {
-
-            await deleteDoc(
-                dish.ref
-            );
-
-        }
-
-
-        await deleteDoc(
-            doc(
-                db,
-                "users",
-                currentUser.uid,
-                "restaurants",
-                selectedRestaurant.id
-            )
-        );
-
-
-        selectedRestaurant = null;
-
-        await loadRestaurants();
-
-        showHome();
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to delete the restaurant."
-        );
-
+    #user-name {
+        display: none;
     }
 
-}
-
-
-// ============================================================
-// Add / Edit Dish
-// ============================================================
-
-function openDishModal(
-    dish = null
-) {
-
-    editingDishId =
-        dish
-            ? dish.id
-            : null;
-
-
-    dishModalTitle.textContent =
-        dish
-            ? "Edit Dish"
-            : "Add Dish";
-
-
-    dishNameInput.value =
-        dish?.name || "";
-
-
-    dishRatingInput.value =
-        dish?.rating ?? "";
-
-
-    dishReviewInput.value =
-        dish?.review || "";
-
-
-    dishNotesInput.value =
-        dish?.notes || "";
-
-
-    dishFormError.textContent = "";
-
-
-    dishModal.classList.remove(
-        "hidden"
-    );
-
-
-    dishNameInput.focus();
-
-}
-
-
-dishForm.addEventListener(
-    "submit",
-    async (event) => {
-
-        event.preventDefault();
-
-        dishFormError.textContent = "";
-
-
-        if (!selectedRestaurant) return;
-
-
-        const name =
-            dishNameInput.value.trim();
-
-
-        const rating =
-            Number(
-                dishRatingInput.value
-            );
-
-
-        const review =
-            dishReviewInput.value.trim();
-
-
-        const notes =
-            dishNotesInput.value.trim();
-
-
-        if (
-            !name ||
-            Number.isNaN(rating) ||
-            rating < 0 ||
-            rating > 10
-        ) {
-
-            dishFormError.textContent =
-                "Please enter a dish name and rating from 0 to 10.";
-
-            return;
-
-        }
-
-
-        const dishData = {
-
-            name,
-            rating,
-            review,
-            notes
-
-        };
-
-
-        try {
-
-            const dishesPath = [
-                "users",
-                currentUser.uid,
-                "restaurants",
-                selectedRestaurant.id,
-                "dishes"
-            ];
-
-
-            if (editingDishId) {
-
-                await updateDoc(
-                    doc(
-                        db,
-                        ...dishesPath,
-                        editingDishId
-                    ),
-                    dishData
-                );
-
-            } else {
-
-                await addDoc(
-                    collection(
-                        db,
-                        ...dishesPath
-                    ),
-                    dishData
-                );
-
-            }
-
-
-            closeModal(
-                dishModal
-            );
-
-
-            await loadDishes();
-
-        } catch (error) {
-
-            console.error(error);
-
-            dishFormError.textContent =
-                "Unable to save dish. Please try again.";
-
-        }
-
-    }
-);
-
-
-// ============================================================
-// Delete Dish
-// ============================================================
-
-async function deleteDish(
-    dishId
-) {
-
-    if (!selectedRestaurant) return;
-
-
-    const confirmed =
-        confirm(
-            "Delete this dish?\n\n" +
-            "This cannot be undone."
-        );
-
-
-    if (!confirmed) return;
-
-
-    try {
-
-        await deleteDoc(
-            doc(
-                db,
-                "users",
-                currentUser.uid,
-                "restaurants",
-                selectedRestaurant.id,
-                "dishes",
-                dishId
-            )
-        );
-
-
-        await loadDishes();
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to delete the dish."
-        );
-
+    #manage-lists-button {
+        font-size: 13px;
     }
 
-}
-
-
-// ============================================================
-// Navigation
-// ============================================================
-
-function showHome() {
-
-    homeView.classList.remove(
-        "hidden"
-    );
-
-    restaurantView.classList.add(
-        "hidden"
-    );
-
-    selectedRestaurant = null;
-
-}
-
-
-document.getElementById("home-button")
-    .addEventListener(
-        "click",
-        () => {
-
-            showHome();
-
-        }
-    );
-
-
-document.getElementById("back-button")
-    .addEventListener(
-        "click",
-        () => {
-
-            showHome();
-
-        }
-    );
-
-
-// ============================================================
-// Buttons
-// ============================================================
-
-document.getElementById(
-    "add-restaurant-button"
-).addEventListener(
-    "click",
-    () => {
-
-        openRestaurantModal();
-
-    }
-);
-
-
-document.getElementById(
-    "empty-add-button"
-).addEventListener(
-    "click",
-    () => {
-
-        openRestaurantModal();
-
-    }
-);
-
-
-document.getElementById(
-    "edit-restaurant-button"
-).addEventListener(
-    "click",
-    () => {
-
-        if (selectedRestaurant) {
-
-            openRestaurantModal(
-                selectedRestaurant
-            );
-
-        }
-
-    }
-);
-
-
-document.getElementById(
-    "delete-restaurant-button"
-).addEventListener(
-    "click",
-    () => {
-
-        deleteRestaurant();
-
-    }
-);
-
-
-document.getElementById(
-    "add-dish-button"
-).addEventListener(
-    "click",
-    () => {
-
-        openDishModal();
-
-    }
-);
-
-
-document.getElementById(
-    "empty-add-dish-button"
-).addEventListener(
-    "click",
-    () => {
-
-        openDishModal();
-
-    }
-);
-
-
-// ============================================================
-// Modal controls
-// ============================================================
-
-document.querySelectorAll(
-    ".modal-close"
-).forEach((button) => {
-
-    button.addEventListener(
-        "click",
-        () => {
-
-            const modalId =
-                button.dataset.close;
-
-            closeModal(
-                document.getElementById(
-                    modalId
-                )
-            );
-
-        }
-    );
-
-});
-
-
-document.querySelectorAll(
-    ".modal"
-).forEach((modal) => {
-
-    modal.addEventListener(
-        "click",
-        (event) => {
-
-            if (
-                event.target === modal
-            ) {
-
-                closeModal(modal);
-
-            }
-
-        }
-    );
-
-});
-
-
-function closeModal(modal) {
-
-    modal.classList.add(
-        "hidden"
-    );
-
-}
-
-
-// ============================================================
-// Basic HTML escaping
-// ============================================================
-
-function escapeHtml(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return "";
-
+    .view {
+        padding: 30px 18px 60px;
     }
 
-    return String(value)
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
+    .page-heading,
+    .section-heading {
+        align-items: flex-start;
 
+        flex-direction: column;
+    }
+
+    .restaurant-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .restaurant-header {
+        flex-direction: column;
+
+        margin-bottom: 40px;
+    }
+
+    .restaurant-header-info h1 {
+        font-size: 32px;
+    }
+
+    .restaurant-actions {
+        width: 100%;
+    }
+
+    .restaurant-actions button {
+        flex: 1;
+    }
+
+    .login-card {
+        padding: 38px 24px;
+    }
+
+    .modal-card {
+        padding: 26px 20px;
+    }
+
+    .list-add-form {
+        align-items: stretch;
+    }
+
+    .list-add-form button {
+        padding-left: 13px;
+        padding-right: 13px;
+    }
+
+    .card-bottom {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 8px;
+    }
 }
