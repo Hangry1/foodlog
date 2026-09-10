@@ -20,7 +20,11 @@
 
             <p class="tagline">Your food, remembered.</p>
 
-            <button id="google-sign-in" class="google-button">
+            <button
+                id="google-sign-in"
+                class="google-button"
+                type="button"
+            >
                 <span class="google-icon">G</span>
                 Continue with Google
             </button>
@@ -36,27 +40,41 @@
     <div id="app" class="hidden">
 
         <!-- Header -->
+
         <header class="site-header">
 
-            <button id="home-button" class="brand-button">
+            <button
+                id="home-button"
+                class="brand-button"
+                type="button"
+            >
                 food<span>Log</span>
             </button>
 
             <div class="user-menu">
 
-                <button id="manage-lists-button"
-                        class="text-button">
+                <button
+                    id="manage-lists-button"
+                    class="text-button"
+                    type="button"
+                >
                     Manage Lists
                 </button>
 
-                <img id="user-photo"
-                     class="user-photo"
-                     src=""
-                     alt="">
+                <img
+                    id="user-photo"
+                    class="user-photo"
+                    src=""
+                    alt=""
+                >
 
                 <span id="user-name"></span>
 
-                <button id="sign-out-button" class="text-button">
+                <button
+                    id="sign-out-button"
+                    class="text-button"
+                    type="button"
+                >
                     Sign out
                 </button>
 
@@ -73,26 +91,33 @@
 
                 <div>
                     <h1>My Restaurants</h1>
+
                     <p class="subtitle">
                         Places you've eaten and what you thought.
                     </p>
                 </div>
 
-                <button id="add-restaurant-button"
-                        type="button"
-                        class="primary-button">
+                <button
+                    id="add-restaurant-button"
+                    class="primary-button"
+                    type="button"
+                >
                     <span>＋</span> Add Restaurant
                 </button>
 
             </div>
 
 
-            <div id="restaurant-list"
-                 class="restaurant-grid"></div>
+            <div
+                id="restaurant-list"
+                class="restaurant-grid"
+            ></div>
 
 
-            <div id="empty-state"
-                 class="empty-state hidden">
+            <div
+                id="empty-state"
+                class="empty-state hidden"
+            >
 
                 <div class="empty-icon">🍽️</div>
 
@@ -103,9 +128,11 @@
                     somewhere you've eaten.
                 </p>
 
-                <button id="empty-add-button"
-                        type="button"
-                        class="primary-button">
+                <button
+                    id="empty-add-button"
+                    class="primary-button"
+                    type="button"
+                >
                     ＋ Add Your First Restaurant
                 </button>
 
@@ -116,12 +143,16 @@
 
         <!-- ==================== RESTAURANT VIEW ==================== -->
 
-        <main id="restaurant-view"
-              class="view hidden">
+        <main
+            id="restaurant-view"
+            class="view hidden"
+        >
 
-            <button id="back-button"
-                    type="button"
-                    class="back-button">
+            <button
+                id="back-button"
+                class="back-button"
+                type="button"
+            >
                 ← My Restaurants
             </button>
 
@@ -132,29 +163,39 @@
 
                     <h1 id="restaurant-name"></h1>
 
-                    <p id="restaurant-location"
-                       class="restaurant-meta"></p>
+                    <p
+                        id="restaurant-location"
+                        class="restaurant-meta"
+                    ></p>
 
-                    <p id="restaurant-cuisine"
-                       class="restaurant-meta"></p>
+                    <p
+                        id="restaurant-cuisine"
+                        class="restaurant-meta"
+                    ></p>
 
-                    <div id="restaurant-rating"
-                         class="large-rating"></div>
+                    <div
+                        id="restaurant-rating"
+                        class="large-rating"
+                    ></div>
 
                 </div>
 
 
                 <div class="restaurant-actions">
 
-                    <button id="edit-restaurant-button"
-                            type="button"
-                            class="secondary-button">
+                    <button
+                        id="edit-restaurant-button"
+                        class="secondary-button"
+                        type="button"
+                    >
                         ✎ Edit
                     </button>
 
-                    <button id="delete-restaurant-button"
-                            type="button"
-                            class="danger-button">
+                    <button
+                        id="delete-restaurant-button"
+                        class="danger-button"
+                        type="button"
+                    >
                         Delete
                     </button>
 
@@ -173,21 +214,27 @@
                     </p>
                 </div>
 
-                <button id="add-dish-button"
-                        type="button"
-                        class="primary-button">
+                <button
+                    id="add-dish-button"
+                    class="primary-button"
+                    type="button"
+                >
                     ＋ Add Dish
                 </button>
 
             </div>
 
 
-            <div id="dish-list"
-                 class="dish-list"></div>
+            <div
+                id="dish-list"
+                class="dish-list"
+            ></div>
 
 
-            <div id="dish-empty-state"
-                 class="empty-state small hidden">
+            <div
+                id="dish-empty-state"
+                class="empty-state small hidden"
+            >
 
                 <div class="empty-icon">🍴</div>
 
@@ -197,9 +244,11 @@
                     Add something you ordered at this restaurant.
                 </p>
 
-                <button id="empty-add-dish-button"
-                        type="button"
-                        class="primary-button">
+                <button
+                    id="empty-add-dish-button"
+                    class="primary-button"
+                    type="button"
+                >
                     ＋ Add Dish
                 </button>
 
@@ -212,13 +261,18 @@
 
     <!-- ==================== RESTAURANT MODAL ==================== -->
 
-    <div id="restaurant-modal"
-         class="modal hidden">
+    <div
+        id="restaurant-modal"
+        class="modal hidden"
+    >
 
         <div class="modal-card">
 
-            <button class="modal-close"
-                    data-close="restaurant-modal">
+            <button
+                class="modal-close"
+                data-close="restaurant-modal"
+                type="button"
+            >
                 ×
             </button>
 
@@ -246,19 +300,24 @@
                     Locations
                 </label>
 
-                <div id="location-options"
-                     class="multi-select-options">
+                <div
+                    id="location-options"
+                    class="multi-select-options"
+                >
                 </div>
 
-                <button type="button"
-                        id="manage-locations-from-restaurant"
-                        class="manage-inline-button">
+                <button
+                    type="button"
+                    id="manage-locations-from-restaurant"
+                    class="manage-inline-button"
+                >
                     + Manage locations
                 </button>
 
-                <p id="location-selection-error"
-                   class="field-error">
-                </p>
+                <p
+                    id="location-selection-error"
+                    class="field-error"
+                ></p>
 
 
                 <!-- Categories -->
@@ -267,20 +326,27 @@
                     Cuisine & Categories
                 </label>
 
-                <div id="category-options"
-                     class="multi-select-options">
+                <div
+                    id="category-options"
+                    class="multi-select-options"
+                >
                 </div>
 
-                <button type="button"
-                        id="manage-categories-from-restaurant"
-                        class="manage-inline-button">
+                <button
+                    type="button"
+                    id="manage-categories-from-restaurant"
+                    class="manage-inline-button"
+                >
                     + Manage categories
                 </button>
 
-                <p id="category-selection-error"
-                   class="field-error">
-                </p>
+                <p
+                    id="category-selection-error"
+                    class="field-error"
+                ></p>
 
+
+                <!-- Overall Rating -->
 
                 <label for="restaurant-rating-input">
                     Overall Rating
@@ -303,14 +369,17 @@
                 </div>
 
 
-                <button type="submit"
-                        class="primary-button full-width">
+                <button
+                    type="submit"
+                    class="primary-button full-width"
+                >
                     Save Restaurant
                 </button>
 
-                <p id="restaurant-form-error"
-                   class="error-message">
-                </p>
+                <p
+                    id="restaurant-form-error"
+                    class="error-message"
+                ></p>
 
             </form>
 
@@ -321,32 +390,39 @@
 
     <!-- ==================== MANAGE LISTS MODAL ==================== -->
 
-    <div id="lists-modal"
-         class="modal hidden">
+    <div
+        id="lists-modal"
+        class="modal hidden"
+    >
 
         <div class="modal-card lists-modal-card">
 
-            <button class="modal-close"
-                    data-close="lists-modal">
+            <button
+                class="modal-close"
+                data-close="lists-modal"
+                type="button"
+            >
                 ×
             </button>
 
             <h2>Manage Lists</h2>
 
             <p class="modal-description">
-                Create the locations and categories you use
-                when logging restaurants.
+                Create the locations, cuisine/categories, and food
+                categories you use when logging restaurants and dishes.
             </p>
 
 
-            <!-- Locations -->
+            <!-- ==================== LOCATIONS ==================== -->
 
             <section class="list-manager-section">
 
                 <h3>Locations</h3>
 
-                <form id="location-form"
-                      class="list-add-form">
+                <form
+                    id="location-form"
+                    class="list-add-form"
+                >
 
                     <input
                         id="new-location-input"
@@ -355,32 +431,38 @@
                         maxlength="50"
                     >
 
-                    <button type="submit"
-                            class="primary-button">
+                    <button
+                        type="submit"
+                        class="primary-button"
+                    >
                         Add
                     </button>
 
                 </form>
 
-                <p id="location-form-error"
-                   class="field-error">
-                </p>
+                <p
+                    id="location-form-error"
+                    class="field-error"
+                ></p>
 
-                <div id="location-list"
-                     class="managed-list">
-                </div>
+                <div
+                    id="location-list"
+                    class="managed-list"
+                ></div>
 
             </section>
 
 
-            <!-- Categories -->
+            <!-- ==================== CUISINE / CATEGORIES ==================== -->
 
             <section class="list-manager-section">
 
                 <h3>Cuisine & Categories</h3>
 
-                <form id="category-form"
-                      class="list-add-form">
+                <form
+                    id="category-form"
+                    class="list-add-form"
+                >
 
                     <input
                         id="new-category-input"
@@ -389,20 +471,69 @@
                         maxlength="50"
                     >
 
-                    <button type="submit"
-                            class="primary-button">
+                    <button
+                        type="submit"
+                        class="primary-button"
+                    >
                         Add
                     </button>
 
                 </form>
 
-                <p id="category-form-error"
-                   class="field-error">
+                <p
+                    id="category-form-error"
+                    class="field-error"
+                ></p>
+
+                <div
+                    id="category-list"
+                    class="managed-list"
+                ></div>
+
+            </section>
+
+
+            <!-- ==================== FOOD CATEGORIES ==================== -->
+
+            <section class="list-manager-section">
+
+                <h3>Food Categories</h3>
+
+                <p class="list-section-description">
+                    These are the types of food you can assign to
+                    individual dishes.
                 </p>
 
-                <div id="category-list"
-                     class="managed-list">
-                </div>
+                <form
+                    id="food-category-form"
+                    class="list-add-form"
+                >
+
+                    <input
+                        id="new-food-category-input"
+                        type="text"
+                        placeholder="e.g. Burger"
+                        maxlength="50"
+                    >
+
+                    <button
+                        type="submit"
+                        class="primary-button"
+                    >
+                        Add
+                    </button>
+
+                </form>
+
+                <p
+                    id="food-category-form-error"
+                    class="field-error"
+                ></p>
+
+                <div
+                    id="food-category-list"
+                    class="managed-list"
+                ></div>
 
             </section>
 
@@ -413,13 +544,18 @@
 
     <!-- ==================== DISH MODAL ==================== -->
 
-    <div id="dish-modal"
-         class="modal hidden">
+    <div
+        id="dish-modal"
+        class="modal hidden"
+    >
 
         <div class="modal-card">
 
-            <button class="modal-close"
-                    data-close="dish-modal">
+            <button
+                class="modal-close"
+                data-close="dish-modal"
+                type="button"
+            >
                 ×
             </button>
 
@@ -440,6 +576,37 @@
                     required
                 >
 
+
+                <!-- Food Category -->
+
+                <label for="dish-category-input">
+                    Food Category
+                </label>
+
+                <select
+                    id="dish-category-input"
+                    required
+                >
+                    <option value="">
+                        Select a category
+                    </option>
+                </select>
+
+                <button
+                    type="button"
+                    id="manage-food-categories-from-dish"
+                    class="manage-inline-button"
+                >
+                    + Manage food categories
+                </button>
+
+                <p
+                    id="dish-category-selection-error"
+                    class="field-error"
+                ></p>
+
+
+                <!-- Rating -->
 
                 <label for="dish-rating-input">
                     Rating
@@ -462,16 +629,7 @@
                 </div>
 
 
-                <label for="dish-review-input">
-                    Review
-                </label>
-
-                <textarea
-                    id="dish-review-input"
-                    rows="4"
-                    placeholder="What did you think?"
-                ></textarea>
-
+                <!-- Additional Notes -->
 
                 <label for="dish-notes-input">
                     Additional Notes
@@ -479,19 +637,22 @@
 
                 <textarea
                     id="dish-notes-input"
-                    rows="3"
-                    placeholder="Anything else worth remembering..."
+                    rows="5"
+                    placeholder="What did you think? Anything else worth remembering..."
                 ></textarea>
 
 
-                <button type="submit"
-                        class="primary-button full-width">
+                <button
+                    type="submit"
+                    class="primary-button full-width"
+                >
                     Save Dish
                 </button>
 
-                <p id="dish-form-error"
-                   class="error-message">
-                </p>
+                <p
+                    id="dish-form-error"
+                    class="error-message"
+                ></p>
 
             </form>
 
@@ -501,8 +662,11 @@
 
 
     <!-- Firebase / Application JavaScript -->
-    <script type="module"
-            src="script.js"></script>
+
+    <script
+        type="module"
+        src="script.js"
+    ></script>
 
 </body>
 </html>
