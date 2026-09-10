@@ -1,1 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>foodLog</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ==================== LOGIN SCREEN ==================== -->
+
+    <main id="login-screen" class="screen">
+        <div class="login-card">
+
+            <div class="brand">food<span>Log</span></div>
+
+            <p class="tagline">Your food, remembered.</p>
+
+            <button id="google-sign-in" class="google-button">
+                <span class="google-icon">G</span>
+                Continue with Google
+            </button>
+
+            <p id="login-error" class="error-message"></p>
+
+        </div>
+    </main>
+
+
+    <!-- ==================== APPLICATION ==================== -->
+
+    <div id="app" class="hidden">
+
+        <!-- Header -->
+        <header class="site-header">
+
+            <button id="home-button" class="brand-button">
+                food<span>Log</span>
+            </button>
+
+            <div class="user-menu">
+
+                <img id="user-photo"
+                     class="user-photo"
+                     src=""
+                     alt="">
+
+                <span id="user-name"></span>
+
+                <button id="sign-out-button" class="text-button">
+                    Sign out
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- ==================== HOME VIEW ==================== -->
+
+        <main id="home-view" class="view">
+
+            <div class="page-heading">
+
+                <div>
+                    <h1>My Restaurants</h1>
+                    <p class="subtitle">
+                        Places you've eaten and what you thought.
+                    </p>
+                </div>
+
+                <button id="add-restaurant-button" class="primary-button">
+                    <span>＋</span> Add Restaurant
+                </button>
+
+            </div>
+
+
+            <div id="restaurant-list" class="restaurant-grid"></div>
+
+
+            <div id="empty-state" class="empty-state hidden">
+
+                <div class="empty-icon">🍽️</div>
+
+                <h2>No restaurants yet</h2>
+
+                <p>
+                    Start building your personal food log by adding
+                    somewhere you've eaten.
+                </p>
+
+                <button id="empty-add-button" class="primary-button">
+                    ＋ Add Your First Restaurant
+                </button>
+
+            </div>
+
+        </main>
+
+
+        <!-- ==================== RESTAURANT VIEW ==================== -->
+
+        <main id="restaurant-view" class="view hidden">
+
+            <button id="back-button" class="back-button">
+                ← My Restaurants
+            </button>
+
+
+            <div class="restaurant-header">
+
+                <div class="restaurant-header-info">
+
+                    <h1 id="restaurant-name"></h1>
+
+                    <p id="restaurant-location" class="restaurant-meta"></p>
+
+                    <p id="restaurant-cuisine" class="restaurant-meta"></p>
+
+                    <div id="restaurant-rating" class="large-rating"></div>
+
+                </div>
+
+
+                <div class="restaurant-actions">
+
+                    <button id="edit-restaurant-button"
+                            class="secondary-button">
+                        ✎ Edit
+                    </button>
+
+                    <button id="delete-restaurant-button"
+                            class="danger-button">
+                        Delete
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="section-heading">
+
+                <div>
+                    <h2>Dishes</h2>
+                    <p class="subtitle">
+                        What you ordered and how it was.
+                    </p>
+                </div>
+
+                <button id="add-dish-button" class="primary-button">
+                    ＋ Add Dish
+                </button>
+
+            </div>
+
+
+            <div id="dish-list" class="dish-list"></div>
+
+
+            <div id="dish-empty-state" class="empty-state small hidden">
+
+                <div class="empty-icon">🍴</div>
+
+                <h2>No dishes logged</h2>
+
+                <p>
+                    Add something you ordered at this restaurant.
+                </p>
+
+                <button id="empty-add-dish-button"
+                        class="primary-button">
+                    ＋ Add Dish
+                </button>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- ==================== RESTAURANT MODAL ==================== -->
+
+    <div id="restaurant-modal" class="modal hidden">
+
+        <div class="modal-card">
+
+            <button class="modal-close"
+                    data-close="restaurant-modal">
+                ×
+            </button>
+
+            <h2 id="restaurant-modal-title">
+                Add Restaurant
+            </h2>
+
+            <form id="restaurant-form">
+
+                <label for="restaurant-name-input">
+                    Restaurant Name
+                </label>
+
+                <input
+                    id="restaurant-name-input"
+                    type="text"
+                    placeholder="e.g. Joe's Pizza"
+                    required
+                >
+
+
+                <label for="restaurant-location-input">
+                    Location
+                </label>
+
+                <input
+                    id="restaurant-location-input"
+                    type="text"
+                    placeholder="e.g. Grand Rapids, MI"
+                    required
+                >
+
+
+                <label for="restaurant-cuisine-input">
+                    Cuisine
+                </label>
+
+                <input
+                    id="restaurant-cuisine-input"
+                    type="text"
+                    placeholder="e.g. Italian"
+                    required
+                >
+
+
+                <label for="restaurant-rating-input">
+                    Overall Rating
+                </label>
+
+                <div class="rating-input">
+
+                    <input
+                        id="restaurant-rating-input"
+                        type="number"
+                        min="0"
+                        max="10"
+                        step="0.1"
+                        placeholder="9.0"
+                        required
+                    >
+
+                    <span>/ 10</span>
+
+                </div>
+
+
+                <button type="submit" class="primary-button full-width">
+                    Save Restaurant
+                </button>
+
+                <p id="restaurant-form-error"
+                   class="error-message"></p>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================== DISH MODAL ==================== -->
+
+    <div id="dish-modal" class="modal hidden">
+
+        <div class="modal-card">
+
+            <button class="modal-close"
+                    data-close="dish-modal">
+                ×
+            </button>
+
+            <h2 id="dish-modal-title">
+                Add Dish
+            </h2>
+
+            <form id="dish-form">
+
+                <label for="dish-name-input">
+                    Dish Name
+                </label>
+
+                <input
+                    id="dish-name-input"
+                    type="text"
+                    placeholder="e.g. Pepperoni Pizza"
+                    required
+                >
+
+
+                <label for="dish-rating-input">
+                    Rating
+                </label>
+
+                <div class="rating-input">
+
+                    <input
+                        id="dish-rating-input"
+                        type="number"
+                        min="0"
+                        max="10"
+                        step="0.1"
+                        placeholder="9.5"
+                        required
+                    >
+
+                    <span>/ 10</span>
+
+                </div>
+
+
+                <label for="dish-review-input">
+                    Review
+                </label>
+
+                <textarea
+                    id="dish-review-input"
+                    rows="4"
+                    placeholder="What did you think?"
+                ></textarea>
+
+
+                <label for="dish-notes-input">
+                    Additional Notes
+                </label>
+
+                <textarea
+                    id="dish-notes-input"
+                    rows="3"
+                    placeholder="Anything else worth remembering..."
+                ></textarea>
+
+
+                <button type="submit" class="primary-button full-width">
+                    Save Dish
+                </button>
+
+                <p id="dish-form-error"
+                   class="error-message"></p>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- Firebase / Application JavaScript -->
+    <script type="module" src="script.js"></script>
+
+</body>
+</html>
