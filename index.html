@@ -44,6 +44,11 @@
 
             <div class="user-menu">
 
+                <button id="manage-lists-button"
+                        class="text-button">
+                    Manage Lists
+                </button>
+
                 <img id="user-photo"
                      class="user-photo"
                      src=""
@@ -73,17 +78,20 @@
                     </p>
                 </div>
 
-                <button id="add-restaurant-button" class="primary-button">
+                <button id="add-restaurant-button"
+                        class="primary-button">
                     <span>＋</span> Add Restaurant
                 </button>
 
             </div>
 
 
-            <div id="restaurant-list" class="restaurant-grid"></div>
+            <div id="restaurant-list"
+                 class="restaurant-grid"></div>
 
 
-            <div id="empty-state" class="empty-state hidden">
+            <div id="empty-state"
+                 class="empty-state hidden">
 
                 <div class="empty-icon">🍽️</div>
 
@@ -94,7 +102,8 @@
                     somewhere you've eaten.
                 </p>
 
-                <button id="empty-add-button" class="primary-button">
+                <button id="empty-add-button"
+                        class="primary-button">
                     ＋ Add Your First Restaurant
                 </button>
 
@@ -105,9 +114,11 @@
 
         <!-- ==================== RESTAURANT VIEW ==================== -->
 
-        <main id="restaurant-view" class="view hidden">
+        <main id="restaurant-view"
+              class="view hidden">
 
-            <button id="back-button" class="back-button">
+            <button id="back-button"
+                    class="back-button">
                 ← My Restaurants
             </button>
 
@@ -118,11 +129,14 @@
 
                     <h1 id="restaurant-name"></h1>
 
-                    <p id="restaurant-location" class="restaurant-meta"></p>
+                    <p id="restaurant-location"
+                       class="restaurant-meta"></p>
 
-                    <p id="restaurant-cuisine" class="restaurant-meta"></p>
+                    <p id="restaurant-cuisine"
+                       class="restaurant-meta"></p>
 
-                    <div id="restaurant-rating" class="large-rating"></div>
+                    <div id="restaurant-rating"
+                         class="large-rating"></div>
 
                 </div>
 
@@ -148,22 +162,26 @@
 
                 <div>
                     <h2>Dishes</h2>
+
                     <p class="subtitle">
                         What you ordered and how it was.
                     </p>
                 </div>
 
-                <button id="add-dish-button" class="primary-button">
+                <button id="add-dish-button"
+                        class="primary-button">
                     ＋ Add Dish
                 </button>
 
             </div>
 
 
-            <div id="dish-list" class="dish-list"></div>
+            <div id="dish-list"
+                 class="dish-list"></div>
 
 
-            <div id="dish-empty-state" class="empty-state small hidden">
+            <div id="dish-empty-state"
+                 class="empty-state small hidden">
 
                 <div class="empty-icon">🍴</div>
 
@@ -187,7 +205,8 @@
 
     <!-- ==================== RESTAURANT MODAL ==================== -->
 
-    <div id="restaurant-modal" class="modal hidden">
+    <div id="restaurant-modal"
+         class="modal hidden">
 
         <div class="modal-card">
 
@@ -214,28 +233,46 @@
                 >
 
 
-                <label for="restaurant-location-input">
-                    Location
+                <!-- Locations -->
+
+                <label>
+                    Locations
                 </label>
 
-                <input
-                    id="restaurant-location-input"
-                    type="text"
-                    placeholder="e.g. Grand Rapids, MI"
-                    required
-                >
+                <div id="location-options"
+                     class="multi-select-options">
+                </div>
+
+                <button type="button"
+                        id="manage-locations-from-restaurant"
+                        class="manage-inline-button">
+                    + Manage locations
+                </button>
+
+                <p id="location-selection-error"
+                   class="field-error">
+                </p>
 
 
-                <label for="restaurant-cuisine-input">
-                    Cuisine
+                <!-- Categories -->
+
+                <label>
+                    Cuisine & Categories
                 </label>
 
-                <input
-                    id="restaurant-cuisine-input"
-                    type="text"
-                    placeholder="e.g. Italian"
-                    required
-                >
+                <div id="category-options"
+                     class="multi-select-options">
+                </div>
+
+                <button type="button"
+                        id="manage-categories-from-restaurant"
+                        class="manage-inline-button">
+                    + Manage categories
+                </button>
+
+                <p id="category-selection-error"
+                   class="field-error">
+                </p>
 
 
                 <label for="restaurant-rating-input">
@@ -259,12 +296,14 @@
                 </div>
 
 
-                <button type="submit" class="primary-button full-width">
+                <button type="submit"
+                        class="primary-button full-width">
                     Save Restaurant
                 </button>
 
                 <p id="restaurant-form-error"
-                   class="error-message"></p>
+                   class="error-message">
+                </p>
 
             </form>
 
@@ -273,9 +312,102 @@
     </div>
 
 
+    <!-- ==================== MANAGE LISTS MODAL ==================== -->
+
+    <div id="lists-modal"
+         class="modal hidden">
+
+        <div class="modal-card lists-modal-card">
+
+            <button class="modal-close"
+                    data-close="lists-modal">
+                ×
+            </button>
+
+            <h2>Manage Lists</h2>
+
+            <p class="modal-description">
+                Create the locations and categories you use
+                when logging restaurants.
+            </p>
+
+
+            <!-- Locations -->
+
+            <section class="list-manager-section">
+
+                <h3>Locations</h3>
+
+                <form id="location-form"
+                      class="list-add-form">
+
+                    <input
+                        id="new-location-input"
+                        type="text"
+                        placeholder="e.g. Lansing"
+                        maxlength="50"
+                    >
+
+                    <button type="submit"
+                            class="primary-button">
+                        Add
+                    </button>
+
+                </form>
+
+                <p id="location-form-error"
+                   class="field-error">
+                </p>
+
+                <div id="location-list"
+                     class="managed-list">
+                </div>
+
+            </section>
+
+
+            <!-- Categories -->
+
+            <section class="list-manager-section">
+
+                <h3>Cuisine & Categories</h3>
+
+                <form id="category-form"
+                      class="list-add-form">
+
+                    <input
+                        id="new-category-input"
+                        type="text"
+                        placeholder="e.g. Italian"
+                        maxlength="50"
+                    >
+
+                    <button type="submit"
+                            class="primary-button">
+                        Add
+                    </button>
+
+                </form>
+
+                <p id="category-form-error"
+                   class="field-error">
+                </p>
+
+                <div id="category-list"
+                     class="managed-list">
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
+
+
     <!-- ==================== DISH MODAL ==================== -->
 
-    <div id="dish-modal" class="modal hidden">
+    <div id="dish-modal"
+         class="modal hidden">
 
         <div class="modal-card">
 
@@ -345,12 +477,14 @@
                 ></textarea>
 
 
-                <button type="submit" class="primary-button full-width">
+                <button type="submit"
+                        class="primary-button full-width">
                     Save Dish
                 </button>
 
                 <p id="dish-form-error"
-                   class="error-message"></p>
+                   class="error-message">
+                </p>
 
             </form>
 
@@ -360,7 +494,8 @@
 
 
     <!-- Firebase / Application JavaScript -->
-    <script type="module" src="script.js"></script>
+    <script type="module"
+            src="script.js"></script>
 
 </body>
 </html>
