@@ -48,12 +48,15 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
     font: inherit;
 }
 
 button {
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .hidden {
@@ -82,6 +85,7 @@ button {
     padding: 48px 40px;
 
     background: var(--surface);
+
     border: 1px solid var(--border);
     border-radius: 20px;
 
@@ -104,6 +108,7 @@ button {
     margin: 8px 0 32px;
 
     color: var(--muted);
+
     font-size: 16px;
 }
 
@@ -116,6 +121,7 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
+
     gap: 12px;
 
     padding: 13px 18px;
@@ -140,6 +146,7 @@ button {
 
 .google-icon {
     font-weight: 800;
+
     color: #4285f4;
 }
 
@@ -165,11 +172,16 @@ button {
 }
 
 .brand-button {
+    position: relative;
+    z-index: 1;
+
     border: none;
+
     background: transparent;
 
     font-size: 26px;
     font-weight: 800;
+
     letter-spacing: -1px;
 
     padding: 0;
@@ -182,6 +194,7 @@ button {
 .user-menu {
     display: flex;
     align-items: center;
+
     gap: 12px;
 }
 
@@ -201,7 +214,11 @@ button {
 }
 
 .text-button {
+    position: relative;
+    z-index: 1;
+
     border: none;
+
     background: transparent;
 
     color: var(--muted);
@@ -248,6 +265,7 @@ h1 {
     margin-bottom: 6px;
 
     font-size: 32px;
+
     letter-spacing: -1px;
 }
 
@@ -271,9 +289,13 @@ h2 {
 .primary-button,
 .secondary-button,
 .danger-button {
+    position: relative;
+    z-index: 1;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     gap: 6px;
 
     padding: 10px 16px;
@@ -298,6 +320,7 @@ h2 {
 
 .primary-button:hover {
     background: var(--accent-dark);
+
     border-color: var(--accent-dark);
 }
 
@@ -400,6 +423,7 @@ h2 {
 
 .card-rating {
     font-size: 18px;
+
     font-weight: 700;
 }
 
@@ -453,6 +477,9 @@ h2 {
    ============================== */
 
 .back-button {
+    position: relative;
+    z-index: 1;
+
     margin-bottom: 28px;
 
     padding: 0;
@@ -498,11 +525,13 @@ h2 {
     margin-top: 18px;
 
     font-size: 25px;
+
     font-weight: 700;
 }
 
 .restaurant-actions {
     display: flex;
+
     gap: 8px;
 }
 
@@ -540,26 +569,38 @@ h2 {
     font-size: 19px;
 }
 
+.dish-category {
+    display: inline-block;
+
+    margin-top: 4px;
+
+    padding: 4px 9px;
+
+    background: #f5f5f3;
+
+    border: 1px solid var(--border);
+
+    border-radius: 20px;
+
+    color: var(--muted);
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
 .dish-rating {
     white-space: nowrap;
 
     font-weight: 700;
 }
 
-.dish-review {
-    margin: 14px 0 8px;
+.dish-notes {
+    margin: 14px 0 0;
 
     line-height: 1.55;
-}
 
-.dish-notes {
-    margin: 0;
-
-    color: var(--muted);
-
-    font-size: 14px;
-
-    line-height: 1.5;
+    white-space: pre-wrap;
 }
 
 .dish-actions {
@@ -677,7 +718,8 @@ form label {
 }
 
 form input,
-form textarea {
+form textarea,
+form select {
     width: 100%;
 
     padding: 11px 12px;
@@ -694,11 +736,19 @@ form textarea {
     resize: vertical;
 }
 
+form select {
+    resize: none;
+
+    cursor: pointer;
+}
+
 form input:focus,
-form textarea:focus {
+form textarea:focus,
+form select:focus {
     border-color: var(--accent);
 
-    box-shadow: 0 0 0 3px rgba(228, 123, 57, 0.12);
+    box-shadow:
+        0 0 0 3px rgba(228, 123, 57, 0.12);
 }
 
 .rating-input {
@@ -790,6 +840,11 @@ form textarea:focus {
         0 0 0 3px rgba(228, 123, 57, 0.12);
 }
 
+
+/* ==============================
+   INLINE MANAGE BUTTON
+   ============================== */
+
 .manage-inline-button {
     width: fit-content;
 
@@ -837,6 +892,16 @@ form textarea:focus {
     margin-bottom: 12px;
 
     font-size: 17px;
+}
+
+.list-section-description {
+    margin: -4px 0 12px;
+
+    color: var(--muted);
+
+    font-size: 14px;
+
+    line-height: 1.45;
 }
 
 .list-add-form {
@@ -955,13 +1020,10 @@ form textarea:focus {
         padding: 12px 18px;
 
         flex-wrap: nowrap;
-
-        gap: 12px;
     }
 
     .user-menu {
-        min-width: 0;
-        flex-shrink: 0;
+        gap: 6px;
     }
 
     #user-name {
@@ -1009,7 +1071,15 @@ form textarea:focus {
         padding: 38px 24px;
     }
 
+    .modal {
+        align-items: center;
+
+        padding: 12px;
+    }
+
     .modal-card {
+        max-height: 92vh;
+
         padding: 26px 20px;
     }
 
@@ -1029,22 +1099,10 @@ form textarea:focus {
 
         gap: 8px;
     }
-}
-/* ==============================
-   TOUCH INTERACTION
-   ============================== */
 
-button {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-}
+    .dish-card-header {
+        flex-direction: column;
 
-.primary-button,
-.secondary-button,
-.danger-button,
-.text-button,
-.brand-button,
-.back-button {
-    position: relative;
-    z-index: 1;
+        gap: 8px;
+    }
 }
