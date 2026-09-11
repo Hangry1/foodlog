@@ -1106,3 +1106,209 @@ form select:focus {
         gap: 8px;
     }
 }
+/* ==============================
+   RESTAURANT SEARCH / FILTER / SORT
+   ============================== */
+
+.restaurant-controls {
+    margin-bottom: 28px;
+}
+
+.restaurant-control-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.restaurant-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    max-width: 500px;
+}
+
+.restaurant-search input {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 12px;
+
+    background: white;
+    border: 1px solid #d8d8d8;
+    border-radius: 8px;
+
+    color: var(--text);
+    outline: none;
+}
+
+.restaurant-search input:focus {
+    border-color: var(--accent);
+
+    box-shadow:
+        0 0 0 3px rgba(228, 123, 57, 0.12);
+}
+
+.control-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 20px;
+    height: 20px;
+
+    padding: 0 6px;
+
+    background: var(--accent);
+    color: white;
+
+    border-radius: 10px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.sort-control {
+    position: relative;
+}
+
+.sort-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+
+    z-index: 20;
+
+    min-width: 210px;
+
+    padding: 6px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.sort-menu button {
+    display: block;
+
+    width: 100%;
+
+    padding: 9px 11px;
+
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+
+    color: var(--text);
+
+    text-align: left;
+    font-size: 14px;
+}
+
+.sort-menu button:hover {
+    background: var(--surface-hover);
+}
+
+.sort-menu button.active {
+    background: var(--surface-hover);
+    color: var(--accent);
+    font-weight: 700;
+}
+
+
+/* ==============================
+   FILTER MODAL
+   ============================== */
+
+.filters-modal-card {
+    max-width: 600px;
+}
+
+.filter-section {
+    padding-top: 20px;
+    margin-top: 20px;
+
+    border-top: 1px solid var(--border);
+}
+
+.filter-section:first-of-type {
+    padding-top: 0;
+    margin-top: 0;
+    border-top: none;
+}
+
+.filter-section h3 {
+    margin-bottom: 12px;
+    font-size: 17px;
+}
+
+.filter-section-description {
+    margin: -4px 0 12px;
+
+    color: var(--muted);
+
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    margin-top: 28px;
+    padding-top: 20px;
+
+    border-top: 1px solid var(--border);
+}
+
+
+/* ==============================
+   FILTERED EMPTY STATES
+   ============================== */
+
+.empty-state.filtered-empty h2 {
+    margin-bottom: 8px;
+}
+
+
+/* ==============================
+   MOBILE SEARCH / FILTER CONTROLS
+   ============================== */
+
+@media (max-width: 800px) {
+
+    .restaurant-control-buttons {
+        width: 100%;
+    }
+
+    .restaurant-control-buttons > button,
+    .sort-control {
+        flex: 1;
+    }
+
+    .sort-control > button {
+        width: 100%;
+    }
+
+    .sort-menu {
+        left: 0;
+        right: auto;
+        width: 100%;
+    }
+
+    .restaurant-search {
+        max-width: none;
+    }
+
+    .filter-actions {
+        flex-direction: column-reverse;
+    }
+
+    .filter-actions button {
+        width: 100%;
+    }
+
+}
