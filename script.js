@@ -428,6 +428,31 @@ function showApp() {
     loginScreen.classList.add("hidden");
 
     appElement.classList.remove("hidden");
+
+    if (currentUser) {
+
+        userName.textContent =
+            currentUser.displayName || "";
+
+        if (currentUser.photoURL) {
+
+            userPhoto.src =
+                currentUser.photoURL;
+
+            userPhoto.alt =
+                currentUser.displayName
+                    ? `${currentUser.displayName}'s profile photo`
+                    : "Profile photo";
+
+            userPhoto.classList.remove("hidden");
+
+        } else {
+
+            userPhoto.removeAttribute("src");
+            userPhoto.alt = "";
+            userPhoto.classList.add("hidden");
+        }
+    }
 }
 
 
