@@ -595,6 +595,26 @@ h2 {
     font-weight: 700;
 }
 
+.dish-notes-label {
+    margin: 14px 0 4px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    color: var(--text);
+}
+
+.dish-notes {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: 14px;
+    line-height: 1.5;
+
+    white-space: pre-wrap;
+}
+
 .dish-notes {
     margin: 14px 0 0;
 
