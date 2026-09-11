@@ -86,26 +86,117 @@
 
         <main id="home-view" class="view">
 
-            <div class="page-heading">
+<div class="page-heading">
 
-                <div>
-                    <h1>My Restaurants</h1>
+    <div>
+        <h1>My Restaurants</h1>
 
-                    <p class="subtitle">
-                        Places you've eaten and what you thought.
-                    </p>
-                </div>
+        <p class="subtitle">
+            Places you've eaten and what you thought.
+        </p>
+    </div>
 
+    <button
+        id="add-restaurant-button"
+        class="primary-button"
+        type="button"
+    >
+        <span>＋</span> Add Restaurant
+    </button>
+
+</div>
+
+
+<!-- ==================== RESTAURANT CONTROLS ==================== -->
+
+<div class="restaurant-controls">
+
+    <div class="restaurant-control-buttons">
+
+        <button
+            id="search-restaurants-button"
+            class="secondary-button"
+            type="button"
+        >
+            🔍 Search
+        </button>
+
+        <button
+            id="filter-restaurants-button"
+            class="secondary-button"
+            type="button"
+        >
+            ⚙ Filter
+            <span
+                id="filter-count"
+                class="control-count hidden"
+            ></span>
+        </button>
+
+        <div class="sort-control">
+
+            <button
+                id="sort-restaurants-button"
+                class="secondary-button"
+                type="button"
+            >
+                ⇅ Sort: Default
+            </button>
+
+            <div
+                id="sort-menu"
+                class="sort-menu hidden"
+            >
                 <button
-                    id="add-restaurant-button"
-                    class="primary-button"
                     type="button"
+                    data-sort="default"
                 >
-                    <span>＋</span> Add Restaurant
+                    Default
                 </button>
 
+                <button
+                    type="button"
+                    data-sort="score"
+                >
+                    Score: Highest First
+                </button>
+
+                <button
+                    type="button"
+                    data-sort="alphabetical"
+                >
+                    Alphabetical: A–Z
+                </button>
             </div>
 
+        </div>
+
+    </div>
+
+
+    <div
+        id="restaurant-search-container"
+        class="restaurant-search hidden"
+    >
+
+        <input
+            id="restaurant-search-input"
+            type="search"
+            placeholder="Search restaurants..."
+            autocomplete="off"
+        >
+
+        <button
+            id="clear-restaurant-search"
+            class="text-button"
+            type="button"
+        >
+            Clear
+        </button>
+
+    </div>
+
+</div>
 
             <div
                 id="restaurant-list"
@@ -120,12 +211,12 @@
 
                 <div class="empty-icon">🍽️</div>
 
-                <h2>No restaurants yet</h2>
+        <h2 id="empty-state-title">No restaurants yet</h2>
 
-                <p>
-                    Start building your personal food log by adding
-                    somewhere you've eaten.
-                </p>
+            <p id="empty-state-message">
+            Start building your personal food log by adding
+            somewhere you've eaten.
+            </p>
 
                 <button
                     id="empty-add-button"
@@ -540,7 +631,102 @@
 
     </div>
 
+<!-- ==================== FILTER MODAL ==================== -->
 
+<div
+    id="filters-modal"
+    class="modal hidden"
+>
+
+    <div class="modal-card filters-modal-card">
+
+        <button
+            class="modal-close"
+            data-close="filters-modal"
+            type="button"
+        >
+            ×
+        </button>
+
+        <h2>Filter Restaurants</h2>
+
+        <p class="modal-description">
+            Select multiple filters. Filters within the same
+            group use OR logic; different groups use AND logic.
+        </p>
+
+
+        <!-- Locations -->
+
+        <section class="filter-section">
+
+            <h3>Locations</h3>
+
+            <div
+                id="filter-location-options"
+                class="multi-select-options"
+            ></div>
+
+        </section>
+
+
+        <!-- Restaurant Categories -->
+
+        <section class="filter-section">
+
+            <h3>Cuisine & Categories</h3>
+
+            <div
+                id="filter-category-options"
+                class="multi-select-options"
+            ></div>
+
+        </section>
+
+
+        <!-- Food Categories -->
+
+        <section class="filter-section">
+
+            <h3>Food Categories</h3>
+
+            <p class="filter-section-description">
+                Show restaurants where you've logged at least
+                one dish in one of these categories.
+            </p>
+
+            <div
+                id="filter-food-category-options"
+                class="multi-select-options"
+            ></div>
+
+        </section>
+
+
+        <div class="filter-actions">
+
+            <button
+                id="clear-filters-button"
+                class="secondary-button"
+                type="button"
+            >
+                Clear Filters
+            </button>
+
+            <button
+                id="apply-filters-button"
+                class="primary-button"
+                type="button"
+            >
+                Apply Filters
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+    
     <!-- ==================== DISH MODAL ==================== -->
 
     <div
