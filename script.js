@@ -4,7 +4,7 @@
 
 import {
     initializeApp
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+} from "firebase/app";
 
 import {
     getAuth,
@@ -31,12 +31,12 @@ import {
    ============================================================ */
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBv3Krz0n6WHGDG-3-EjLzMjl163jwWkkTA",
-    authDomain: "foodlog-e1c83.firebaseapp.com",
-    projectId: "foodlog-e1c83",
-    storageBucket: "foodlog-e1c83.firebasestorage.app",
-    messagingSenderId: "996797044798",
-    appId: "1:996797044798:web:2301d5bae0e4c28e4b996f"
+   apiKey: "AIzaSyBv3Krz0n6WHUGD3-EjLzMjl163jwWkkTA",
+   authDomain: "foodlog-e1c83.firebaseapp.com",
+   projectId: "foodlog-e1c83",
+   storageBucket: "foodlog-e1c83.firebasestorage.app",
+   messagingSenderId: "996797044798",
+   appId: "1:996797044798:web:2301d5bae0e4c28e4b996f"
 };
 
 
