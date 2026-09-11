@@ -75,6 +75,37 @@ let userFoodCategories = [];
 
 let dishes = [];
 
+/* ============================================================
+   DEFAULT USER LISTS
+   ============================================================ */
+
+const DEFAULT_LOCATIONS = [
+    "Lansing",
+    "Grand Rapids",
+    "Portland",
+    "Chicago"
+];
+
+const DEFAULT_CATEGORIES = [
+    "Italian",
+    "Steakhouse",
+    "Breakfast",
+    "American",
+    "Mexican",
+    "Pizzeria",
+    "Fast Food"
+];
+
+const DEFAULT_FOOD_CATEGORIES = [
+    "Burger",
+    "Pizza",
+    "Steak",
+    "Salad",
+    "Taco",
+    "Quesadilla",
+    "Pasta",
+    "Chicken"
+];
 
 /* ============================================================
    DOM ELEMENTS
@@ -577,12 +608,22 @@ async function loadUserLists() {
                 if (
                     documentSnapshot.id === "lists"
                 ) {
-
                     listsData =
                         documentSnapshot.data();
                 }
             }
         );
+
+
+        /*
+         * If this user has never had their default
+         * lists initialized, merge the default values
+         * into whatever lists they currently have.
+         *
+         * This happens only once per user.
+         */
+        const defaultsAlreadyInitialized =
+            listsData?.defaultsInitialized === true;
 
 
         if (listsData) {
@@ -609,9 +650,101 @@ async function loadUserLists() {
             userCategories = [];
 
             userFoodCategories = [];
+
         }
 
+
+        /*
+         * Add the default values once.
+         *
+         * The case-insensitive checks prevent duplicates
+         * if a user already created one of these themselves.
+         */
+        if (!defaultsAlreadyInitialized) {
+
+            const mergeDefaults = (
+                existingValues,
+                defaultValues
+            ) => {
+
+                const mergedValues = [
+                    ...existingValues
+                ];
+
+                defaultValues.forEach(
+                    (defaultValue) => {
+
+                        const alreadyExists =
+                            mergedValues.some(
+                                value =>
+                                    value.toLowerCase() ===
+                                    defaultValue.toLowerCase()
+                            );
+
+                        if (!alreadyExists) {
+                            mergedValues.push(
+                                defaultValue
+                            );
+                        }
+                    }
+                );
+
+                return mergedValues.sort(
+                    (a, b) =>
+                        a.localeCompare(b)
+                );
+            };
+
+
+            userLocations =
+                mergeDefaults(
+                    userLocations,
+                    DEFAULT_LOCATIONS
+                );
+
+            userCategories =
+                mergeDefaults(
+                    userCategories,
+                    DEFAULT_CATEGORIES
+                );
+
+            userFoodCategories =
+                mergeDefaults(
+                    userFoodCategories,
+                    DEFAULT_FOOD_CATEGORIES
+                );
+
+
+            /*
+             * Save the merged lists and mark the defaults
+             * as initialized so deleted defaults stay deleted.
+             */
+            const settingsRef =
+                doc(
+                    db,
+                    "users",
+                    currentUser.uid,
+                    "settings",
+                    "lists"
+                );
+
+            await setDoc(
+                settingsRef,
+                {
+                    locations: userLocations,
+                    categories: userCategories,
+                    foodCategories:
+                        userFoodCategories,
+                    defaultsInitialized: true
+                }
+            );
+
+        }
+
+
         renderManagedLists();
+
+        renderFoodCategoryOptions();
 
     } catch (error) {
 
@@ -619,9 +752,9 @@ async function loadUserLists() {
             "Error loading user lists:",
             error
         );
+
     }
 }
-
 
 async function saveUserLists() {
 
@@ -645,7 +778,9 @@ async function saveUserLists() {
             {
                 locations: userLocations,
                 categories: userCategories,
-                foodCategories: userFoodCategories
+                foodCategories:
+                    userFoodCategories,
+                defaultsInitialized: true
             }
         );
 
@@ -657,9 +792,9 @@ async function saveUserLists() {
         );
 
         throw error;
+
     }
 }
-
 
 /* ============================================================
    MANAGED LIST RENDERING
