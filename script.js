@@ -76,6 +76,20 @@ let userFoodCategories = [];
 let dishes = [];
 
 /* ============================================================
+   RESTAURANT SEARCH / FILTER / SORT STATE
+   ============================================================ */
+
+let restaurantSearchTerm = "";
+
+let selectedFilterLocations = [];
+let selectedFilterCategories = [];
+let selectedFilterFoodCategories = [];
+
+let restaurantSortMode = "default";
+
+let restaurantRenderVersion = 0;
+
+/* ============================================================
    DEFAULT USER LISTS
    ============================================================ */
 
@@ -164,7 +178,89 @@ const addRestaurantButton =
 const emptyAddButton =
     document.getElementById("empty-add-button");
 
+/* Restaurant search / filter / sort */
 
+const searchRestaurantsButton =
+    document.getElementById(
+        "search-restaurants-button"
+    );
+
+const filterRestaurantsButton =
+    document.getElementById(
+        "filter-restaurants-button"
+    );
+
+const sortRestaurantsButton =
+    document.getElementById(
+        "sort-restaurants-button"
+    );
+
+const sortMenu =
+    document.getElementById(
+        "sort-menu"
+    );
+
+const restaurantSearchContainer =
+    document.getElementById(
+        "restaurant-search-container"
+    );
+
+const restaurantSearchInput =
+    document.getElementById(
+        "restaurant-search-input"
+    );
+
+const clearRestaurantSearch =
+    document.getElementById(
+        "clear-restaurant-search"
+    );
+
+const filterCount =
+    document.getElementById(
+        "filter-count"
+    );
+
+const emptyStateTitle =
+    document.getElementById(
+        "empty-state-title"
+    );
+
+const emptyStateMessage =
+    document.getElementById(
+        "empty-state-message"
+    );
+
+/* Filter modal */
+
+const filtersModal =
+    document.getElementById(
+        "filters-modal"
+    );
+
+const filterLocationOptions =
+    document.getElementById(
+        "filter-location-options"
+    );
+
+const filterCategoryOptions =
+    document.getElementById(
+        "filter-category-options"
+    );
+
+const filterFoodCategoryOptions =
+    document.getElementById(
+        "filter-food-category-options"
+    );
+
+const clearFiltersButton =
+    document.getElementById(
+        "clear-filters-button"
+    );
+
+const applyFiltersButton =
+    document.getElementById(
+        "apply-filters-button"
+    );
 /* Restaurant detail */
 
 const backButton =
@@ -430,9 +526,17 @@ onAuthStateChanged(
 
             userCategories = [];
 
-            userFoodCategories = [];
+userFoodCategories = [];
 
-            showLogin();
+restaurantSearchTerm = "";
+
+selectedFilterLocations = [];
+selectedFilterCategories = [];
+selectedFilterFoodCategories = [];
+
+restaurantSortMode = "default";
+
+showLogin();
         }
     }
 );
@@ -801,6 +905,8 @@ async function saveUserLists() {
    ============================================================ */
 
 function renderManagedLists() {
+
+renderFilterOptions();
 
     renderManagedList(
         locationList,
@@ -1551,7 +1657,351 @@ async function loadRestaurants() {
 }
 
 
-function renderRestaurants() {
+/* ============================================================
+   RESTAURANT SEARCH / FILTER / SORT
+   ============================================================ */
+
+function arraysOverlap(
+    firstArray,
+    secondArray
+) {
+    const first =
+        cleanStringArray(firstArray)
+            .map(value =>
+                value.toLowerCase()
+            );
+
+    const second =
+        cleanStringArray(secondArray)
+            .map(value =>
+                value.toLowerCase()
+            );
+
+    return first.some(
+        value =>
+            second.includes(value)
+    );
+}
+
+
+function restaurantMatchesBasicFilters(
+    restaurant
+) {
+    const locations =
+        getRestaurantLocations(
+            restaurant
+        );
+
+    const categories =
+        getRestaurantCategories(
+            restaurant
+        );
+
+
+    /*
+     * Multiple locations use OR logic.
+     *
+     * Example:
+     * Lansing + Grand Rapids
+     * means restaurants in either location.
+     */
+    if (
+        selectedFilterLocations.length &&
+        !arraysOverlap(
+            locations,
+            selectedFilterLocations
+        )
+    ) {
+        return false;
+    }
+
+
+    /*
+     * Multiple restaurant categories also
+     * use OR logic.
+     */
+    if (
+        selectedFilterCategories.length &&
+        !arraysOverlap(
+            categories,
+            selectedFilterCategories
+        )
+    ) {
+        return false;
+    }
+
+
+    /*
+     * Search is currently intended for
+     * restaurant names.
+     */
+    if (
+        restaurantSearchTerm
+    ) {
+        const restaurantName =
+            String(
+                restaurant.name || ""
+            ).toLowerCase();
+
+        if (
+            !restaurantName.includes(
+                restaurantSearchTerm
+                    .toLowerCase()
+            )
+        ) {
+            return false;
+        }
+    }
+
+
+    return true;
+}
+
+
+async function getRestaurantsMatchingFoodFilters(
+    restaurantsToCheck
+) {
+    if (
+        !selectedFilterFoodCategories.length
+    ) {
+        return new Set(
+            restaurantsToCheck.map(
+                restaurant =>
+                    restaurant.id
+            )
+        );
+    }
+
+
+    const matchingRestaurantIds =
+        new Set();
+
+    const selectedFoodCategories =
+        selectedFilterFoodCategories.map(
+            category =>
+                category.toLowerCase()
+        );
+
+
+    await Promise.all(
+        restaurantsToCheck.map(
+            async restaurant => {
+
+                try {
+
+                    const dishesRef =
+                        collection(
+                            db,
+                            "users",
+                            currentUser.uid,
+                            "restaurants",
+                            restaurant.id,
+                            "dishes"
+                        );
+
+                    const snapshot =
+                        await getDocs(
+                            dishesRef
+                        );
+
+
+                    const hasMatchingDish =
+                        snapshot.docs.some(
+                            dishSnapshot => {
+
+                                const dish =
+                                    dishSnapshot.data();
+
+                                const foodCategory =
+                                    String(
+                                        dish.foodCategory ||
+                                        ""
+                                    ).toLowerCase();
+
+                                return selectedFoodCategories.includes(
+                                    foodCategory
+                                );
+                            }
+                        );
+
+
+                    if (
+                        hasMatchingDish
+                    ) {
+                        matchingRestaurantIds.add(
+                            restaurant.id
+                        );
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "Error checking dishes for restaurant:",
+                        restaurant.id,
+                        error
+                    );
+
+                }
+
+            }
+        )
+    );
+
+
+    return matchingRestaurantIds;
+}
+
+
+function sortRestaurants(
+    restaurantArray
+) {
+    const sorted =
+        [...restaurantArray];
+
+
+    if (
+        restaurantSortMode ===
+        "score"
+    ) {
+
+        sorted.sort(
+            (a, b) => {
+
+                const scoreA =
+                    Number(
+                        a.overallRating
+                    );
+
+                const scoreB =
+                    Number(
+                        b.overallRating
+                    );
+
+
+                const safeScoreA =
+                    Number.isNaN(scoreA)
+                        ? -Infinity
+                        : scoreA;
+
+                const safeScoreB =
+                    Number.isNaN(scoreB)
+                        ? -Infinity
+                        : scoreB;
+
+
+                if (
+                    safeScoreB !==
+                    safeScoreA
+                ) {
+                    return (
+                        safeScoreB -
+                        safeScoreA
+                    );
+                }
+
+
+                return String(
+                    a.name || ""
+                ).localeCompare(
+                    String(
+                        b.name || ""
+                    )
+                );
+
+            }
+        );
+
+    } else if (
+        restaurantSortMode ===
+        "alphabetical"
+    ) {
+
+        sorted.sort(
+            (a, b) =>
+                String(
+                    a.name || ""
+                ).localeCompare(
+                    String(
+                        b.name || ""
+                    )
+                )
+        );
+
+    }
+
+
+    /*
+     * "default" intentionally preserves
+     * the application's normal restaurant
+     * order.
+     */
+    return sorted;
+}
+
+
+function updateFilterCount() {
+
+    const count =
+        selectedFilterLocations.length +
+        selectedFilterCategories.length +
+        selectedFilterFoodCategories.length;
+
+
+    if (count > 0) {
+
+        filterCount.textContent =
+            String(count);
+
+        filterCount.classList.remove(
+            "hidden"
+        );
+
+    } else {
+
+        filterCount.textContent = "";
+
+        filterCount.classList.add(
+            "hidden"
+        );
+
+    }
+}
+
+
+function updateSortButton() {
+
+    let label =
+        "⇅ Sort: Default";
+
+
+    if (
+        restaurantSortMode ===
+        "score"
+    ) {
+        label =
+            "⇅ Sort: Score";
+    }
+
+
+    if (
+        restaurantSortMode ===
+        "alphabetical"
+    ) {
+        label =
+            "⇅ Sort: A–Z";
+    }
+
+
+    sortRestaurantsButton.textContent =
+        label;
+}
+
+
+async function renderRestaurants() {
+
+    const renderVersion =
+        ++restaurantRenderVersion;
+
 
     restaurantList.innerHTML = "";
 
@@ -1566,6 +2016,117 @@ function renderRestaurants() {
             "hidden"
         );
 
+        emptyStateTitle.textContent =
+            "No restaurants yet";
+
+        emptyStateMessage.textContent =
+            "Start building your personal food log by adding somewhere you've eaten.";
+
+        return;
+    }
+
+
+    /*
+     * First apply location/category/search
+     * filters.
+     */
+    let filteredRestaurants =
+        restaurants.filter(
+            restaurant =>
+                restaurantMatchesBasicFilters(
+                    restaurant
+                )
+        );
+
+
+    /*
+     * Food-category filtering requires
+     * looking at each restaurant's dishes.
+     */
+    if (
+        selectedFilterFoodCategories.length
+    ) {
+
+        const matchingRestaurantIds =
+            await getRestaurantsMatchingFoodFilters(
+                filteredRestaurants
+            );
+
+
+        /*
+         * If another render happened while
+         * the Firestore requests were running,
+         * don't overwrite the newer result.
+         */
+        if (
+            renderVersion !==
+            restaurantRenderVersion
+        ) {
+            return;
+        }
+
+
+        filteredRestaurants =
+            filteredRestaurants.filter(
+                restaurant =>
+                    matchingRestaurantIds.has(
+                        restaurant.id
+                    )
+            );
+    }
+
+
+    filteredRestaurants =
+        sortRestaurants(
+            filteredRestaurants
+        );
+
+
+    updateFilterCount();
+    updateSortButton();
+
+
+    if (
+        !filteredRestaurants.length
+    ) {
+
+        restaurantList.classList.add(
+            "hidden"
+        );
+
+        emptyState.classList.remove(
+            "hidden"
+        );
+
+        emptyStateTitle.textContent =
+            "No restaurants found";
+
+        if (
+            restaurantSearchTerm &&
+            (
+                selectedFilterLocations.length ||
+                selectedFilterCategories.length ||
+                selectedFilterFoodCategories.length
+            )
+        ) {
+
+            emptyStateMessage.textContent =
+                "No restaurants match your search and current filters.";
+
+        } else if (
+            restaurantSearchTerm
+        ) {
+
+            emptyStateMessage.textContent =
+                "No restaurants match your search.";
+
+        } else {
+
+            emptyStateMessage.textContent =
+                "No restaurants match your current filters.";
+
+        }
+
         return;
     }
 
@@ -1579,7 +2140,7 @@ function renderRestaurants() {
     );
 
 
-    restaurants.forEach(
+    filteredRestaurants.forEach(
         restaurant => {
 
             const card =
@@ -1650,47 +2211,471 @@ function renderRestaurants() {
                 "View dishes";
 
 
-            bottom.appendChild(rating);
+            bottom.appendChild(
+                rating
+            );
 
-            bottom.appendChild(dishesCount);
+            bottom.appendChild(
+                dishesCount
+            );
 
 
-            card.appendChild(name);
+            card.appendChild(
+                name
+            );
+
 
             if (
                 getRestaurantLocationText(
                     restaurant
                 )
             ) {
-                card.appendChild(location);
+
+                card.appendChild(
+                    location
+                );
+
             }
+
 
             if (
                 getRestaurantCategoryText(
                     restaurant
                 )
             ) {
-                card.appendChild(cuisine);
+
+                card.appendChild(
+                    cuisine
+                );
+
             }
 
-            card.appendChild(bottom);
+
+            card.appendChild(
+                bottom
+            );
 
 
             card.addEventListener(
                 "click",
                 () => {
+
                     openRestaurant(
                         restaurant.id
                     );
+
                 }
             );
 
 
-            restaurantList.appendChild(card);
+            restaurantList.appendChild(
+                card
+            );
+
         }
     );
 }
 
+/* ============================================================
+   FILTER OPTIONS
+   ============================================================ */
+
+function renderFilterOptions() {
+
+    renderFilterOptionGroup(
+        filterLocationOptions,
+        userLocations,
+        selectedFilterLocations,
+        "filter-location"
+    );
+
+
+    renderFilterOptionGroup(
+        filterCategoryOptions,
+        userCategories,
+        selectedFilterCategories,
+        "filter-category"
+    );
+
+
+    renderFilterOptionGroup(
+        filterFoodCategoryOptions,
+        userFoodCategories,
+        selectedFilterFoodCategories,
+        "filter-food-category"
+    );
+}
+
+
+function renderFilterOptionGroup(
+    container,
+    values,
+    selectedValues,
+    inputName
+) {
+
+    container.innerHTML = "";
+
+
+    if (!values.length) {
+
+        const empty =
+            document.createElement("p");
+
+        empty.className =
+            "filter-section-description";
+
+        empty.textContent =
+            "No options available yet.";
+
+        container.appendChild(
+            empty
+        );
+
+        return;
+    }
+
+
+    values.forEach(
+        value => {
+
+            const wrapper =
+                document.createElement("div");
+
+            wrapper.className =
+                "multi-select-option";
+
+
+            const input =
+                document.createElement("input");
+
+            input.type =
+                "checkbox";
+
+            input.id =
+                `${inputName}-${slugifyFilterValue(value)}`;
+
+            input.name =
+                inputName;
+
+            input.value =
+                value;
+
+            input.checked =
+                selectedValues.some(
+                    selected =>
+                        selected.toLowerCase() ===
+                        value.toLowerCase()
+                );
+
+
+            const label =
+                document.createElement("label");
+
+            label.htmlFor =
+                input.id;
+
+            label.textContent =
+                value;
+
+
+            wrapper.appendChild(
+                input
+            );
+
+            wrapper.appendChild(
+                label
+            );
+
+
+            container.appendChild(
+                wrapper
+            );
+
+        }
+    );
+}
+
+
+function slugifyFilterValue(
+    value
+) {
+
+    return String(value)
+        .toLowerCase()
+        .replace(
+            /[^a-z0-9]+/g,
+            "-"
+        )
+        .replace(
+            /^-+|-+$/g,
+            ""
+        );
+
+}
+
+/* ============================================================
+   FILTER MODAL
+   ============================================================ */
+
+function openFiltersModal() {
+
+    /*
+     * Copy current filters into the temporary
+     * selections shown by the modal.
+     */
+    renderFilterOptions();
+
+    filtersModal.classList.remove(
+        "hidden"
+    );
+}
+
+
+function getCheckedFilterValues(
+    selector
+) {
+
+    return Array.from(
+        document.querySelectorAll(
+            selector
+        )
+    ).map(
+        input =>
+            input.value
+    );
+}
+
+
+filterRestaurantsButton.addEventListener(
+    "click",
+    () => {
+
+        openFiltersModal();
+
+    }
+);
+
+
+clearFiltersButton.addEventListener(
+    "click",
+    () => {
+
+        selectedFilterLocations = [];
+        selectedFilterCategories = [];
+        selectedFilterFoodCategories = [];
+
+
+        renderFilterOptions();
+
+
+        /*
+         * Clearing the filters here immediately
+         * clears them from the application rather
+         * than making the user press Apply again.
+         */
+        renderRestaurants();
+
+
+        if (selectedRestaurant) {
+            renderDishes();
+        }
+
+    }
+);
+
+
+applyFiltersButton.addEventListener(
+    "click",
+    () => {
+
+        selectedFilterLocations =
+            getCheckedFilterValues(
+                'input[name="filter-location"]:checked'
+            );
+
+
+        selectedFilterCategories =
+            getCheckedFilterValues(
+                'input[name="filter-category"]:checked'
+            );
+
+
+        selectedFilterFoodCategories =
+            getCheckedFilterValues(
+                'input[name="filter-food-category"]:checked'
+            );
+
+
+        closeModal(
+            filtersModal
+        );
+
+
+        renderRestaurants();
+
+
+        if (selectedRestaurant) {
+            renderDishes();
+        }
+
+    }
+);
+/* ============================================================
+   RESTAURANT SEARCH
+   ============================================================ */
+
+searchRestaurantsButton.addEventListener(
+    "click",
+    () => {
+
+        const isHidden =
+            restaurantSearchContainer.classList.contains(
+                "hidden"
+            );
+
+
+        restaurantSearchContainer.classList.toggle(
+            "hidden"
+        );
+
+
+        if (isHidden) {
+
+            requestAnimationFrame(
+                () => {
+
+                    restaurantSearchInput.focus();
+
+                }
+            );
+
+        } else {
+
+            restaurantSearchInput.focus();
+
+        }
+
+    }
+);
+
+
+restaurantSearchInput.addEventListener(
+    "input",
+    () => {
+
+        restaurantSearchTerm =
+            restaurantSearchInput.value.trim();
+
+
+        renderRestaurants();
+
+    }
+);
+
+
+clearRestaurantSearch.addEventListener(
+    "click",
+    () => {
+
+        restaurantSearchInput.value =
+            "";
+
+        restaurantSearchTerm =
+            "";
+
+        renderRestaurants();
+
+        restaurantSearchInput.focus();
+
+    }
+);
+/* ============================================================
+   RESTAURANT SORTING
+   ============================================================ */
+
+sortRestaurantsButton.addEventListener(
+    "click",
+    event => {
+
+        event.stopPropagation();
+
+        sortMenu.classList.toggle(
+            "hidden"
+        );
+
+    }
+);
+
+
+sortMenu
+    .querySelectorAll(
+        "button[data-sort]"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    restaurantSortMode =
+                        button.dataset.sort;
+
+
+                    sortMenu.classList.add(
+                        "hidden"
+                    );
+
+
+                    sortMenu
+                        .querySelectorAll(
+                            "button[data-sort]"
+                        )
+                        .forEach(
+                            item => {
+
+                                item.classList.toggle(
+                                    "active",
+                                    item.dataset.sort ===
+                                        restaurantSortMode
+                                );
+
+                            }
+                        );
+
+
+                    updateSortButton();
+
+                    renderRestaurants();
+
+                }
+            );
+
+        }
+    );
+
+
+document.addEventListener(
+    "click",
+    event => {
+
+        if (
+            !sortMenu.contains(
+                event.target
+            ) &&
+            event.target !==
+                sortRestaurantsButton
+        ) {
+
+            sortMenu.classList.add(
+                "hidden"
+            );
+
+        }
+
+    }
+);
 
 /* ============================================================
    RESTAURANT MODAL
@@ -2506,7 +3491,46 @@ function renderDishes() {
     dishList.innerHTML = "";
 
 
-    if (!dishes.length) {
+    /*
+     * If food-category filters are active,
+     * only show dishes belonging to one of
+     * the selected categories.
+     */
+    let visibleDishes =
+        [...dishes];
+
+
+    if (
+        selectedFilterFoodCategories.length
+    ) {
+
+        const selectedCategories =
+            selectedFilterFoodCategories.map(
+                category =>
+                    category.toLowerCase()
+            );
+
+
+        visibleDishes =
+            visibleDishes.filter(
+                dish => {
+
+                    const foodCategory =
+                        String(
+                            dish.foodCategory ||
+                            ""
+                        ).toLowerCase();
+
+                    return selectedCategories.includes(
+                        foodCategory
+                    );
+
+                }
+            );
+    }
+
+
+    if (!visibleDishes.length) {
 
         dishList.classList.add(
             "hidden"
@@ -2515,6 +3539,51 @@ function renderDishes() {
         dishEmptyState.classList.remove(
             "hidden"
         );
+
+
+        /*
+         * Give the user a useful message when
+         * dishes are hidden specifically because
+         * of a food-category filter.
+         */
+        const heading =
+            dishEmptyState.querySelector(
+                "h2"
+            );
+
+        const message =
+            dishEmptyState.querySelector(
+                "p"
+            );
+
+        if (
+            selectedFilterFoodCategories.length
+        ) {
+
+            if (heading) {
+                heading.textContent =
+                    "No matching dishes";
+            }
+
+            if (message) {
+                message.textContent =
+                    "This restaurant has no dishes matching your current food filter.";
+            }
+
+        } else {
+
+            if (heading) {
+                heading.textContent =
+                    "No dishes logged";
+            }
+
+            if (message) {
+                message.textContent =
+                    "Add something you ordered at this restaurant.";
+            }
+
+        }
+
 
         return;
     }
@@ -2529,7 +3598,7 @@ function renderDishes() {
     );
 
 
-    dishes.forEach(
+    visibleDishes.forEach(
         dish => {
 
             const card =
@@ -2606,8 +3675,20 @@ function renderDishes() {
 
             if (
                 dish.notes &&
-                String(dish.notes).trim()
+                String(
+                    dish.notes
+                ).trim()
             ) {
+
+                const notesLabel =
+                    document.createElement("p");
+
+                notesLabel.className =
+                    "dish-notes-label";
+
+                notesLabel.textContent =
+                    "Notes";
+
 
                 const notes =
                     document.createElement("p");
@@ -2618,9 +3699,15 @@ function renderDishes() {
                 notes.textContent =
                     dish.notes;
 
+
+                card.appendChild(
+                    notesLabel
+                );
+
                 card.appendChild(
                     notes
                 );
+
             }
 
 
@@ -2634,7 +3721,8 @@ function renderDishes() {
             const editButton =
                 document.createElement("button");
 
-            editButton.type = "button";
+            editButton.type =
+                "button";
 
             editButton.className =
                 "secondary-button small-button";
@@ -2646,7 +3734,11 @@ function renderDishes() {
             editButton.addEventListener(
                 "click",
                 () => {
-                    openDishModal(dish);
+
+                    openDishModal(
+                        dish
+                    );
+
                 }
             );
 
@@ -2654,7 +3746,8 @@ function renderDishes() {
             const deleteButton =
                 document.createElement("button");
 
-            deleteButton.type = "button";
+            deleteButton.type =
+                "button";
 
             deleteButton.className =
                 "danger-button small-button";
@@ -2666,7 +3759,11 @@ function renderDishes() {
             deleteButton.addEventListener(
                 "click",
                 () => {
-                    deleteDish(dish);
+
+                    deleteDish(
+                        dish
+                    );
+
                 }
             );
 
@@ -2688,10 +3785,10 @@ function renderDishes() {
             dishList.appendChild(
                 card
             );
+
         }
     );
 }
-
 
 /* ============================================================
    DISH MODAL
@@ -3273,6 +4370,23 @@ dishModal.addEventListener(
     }
 );
 
+filtersModal.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target ===
+            filtersModal
+        ) {
+
+            closeModal(
+                filtersModal
+            );
+
+        }
+
+    }
+);
 
 /* ============================================================
    ESCAPE KEY
