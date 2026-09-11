@@ -4,7 +4,7 @@
 
 import {
     initializeApp
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 
 import {
     getAuth,
